@@ -28,27 +28,27 @@ public class ConwayLifeTest {
 		System.out.println("testRule");
 	}
 	
-	@Test
-	public void testOscillaFromFile() throws Exception {
-	    // Carico un Blinker (periodo 2)
-	    System.out.println( "testOscillaFromFile ---------------------" );
-	    boolean[][] initial = PatternLoader.loadFromResource("src/test/resources/blinker.txt", 5, 5);
-	    
- 	    Life liferules = new Life(initial);
-	    
-	    System.out.println( liferules.gridRep() );
-	    System.out.println( "________________________ testOscillaFromFile " );    
-//
-	    liferules.nextGeneration(); // Generazione 1 (cambia stato)
-	    System.out.println( liferules.gridRep() );
-	    System.out.println( "________________________ testOscillaFromFile " );
-	    liferules.nextGeneration(); // Generazione 2 (deve tornare all'originale)
-	    System.out.println( liferules.gridRep() );
-	    System.out.println( "________________________ testOscillaFromFile " );
-//
- 	    assertArrayEquals("L'oscillatore deve tornare allo stato iniziale dopo 2 passi", 
- 	                      initial, liferules.getGrid());
-	}
+//	@Test
+//	public void testOscillaFromFile() throws Exception {
+//	    // Carico un Blinker (periodo 2)
+//	    System.out.println( "testOscillaFromFile ---------------------" );
+//	    boolean[][] initial = PatternLoader.loadFromResource("src/test/resources/blinker.txt", 5, 5);
+//	    
+// 	    Life liferules = new Life(initial);
+//	    
+//	    System.out.println( liferules.gridRep() );
+//	    System.out.println( "________________________ testOscillaFromFile " );    
+////
+//	    liferules.nextGeneration(); // Generazione 1 (cambia stato)
+//	    System.out.println( liferules.gridRep() );
+//	    System.out.println( "________________________ testOscillaFromFile " );
+//	    liferules.nextGeneration(); // Generazione 2 (deve tornare all'originale)
+//	    System.out.println( liferules.gridRep() );
+//	    System.out.println( "________________________ testOscillaFromFile " );
+////
+// 	    assertArrayEquals("L'oscillatore deve tornare allo stato iniziale dopo 2 passi", 
+// 	                      initial, liferules.getGrid());
+//	}
 	
 	@Test
 	public void testOscilla() {

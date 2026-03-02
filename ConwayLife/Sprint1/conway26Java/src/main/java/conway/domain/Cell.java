@@ -15,4 +15,12 @@ public class Cell implements ICell{
 	public boolean isAlive() {
 		return status;
 	}
+
+	@Override
+	public String toString() {
+		String res = status?"0":".";
+		return res;
+	}
+	
+	
 }
