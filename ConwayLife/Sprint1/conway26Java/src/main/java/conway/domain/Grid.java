@@ -17,20 +17,29 @@ public class Grid implements IGrid{
         }
 	}
 	
+	@Override
 	public int getNumRows() {
 		return this.rows;
 	}
 	
+	@Override
 	public int getNumCols() {
 		return this.cols;
 	}
 	
+	@Override
 	public void setCellStatus(int row, int col, boolean status) {
 		this.grid[row][col].setStatus(status);
 	}
 	
+	@Override
 	public boolean isCellAlive(int row, int col) {
 		return this.grid[row][col].isAlive();
+	}
+	
+	@Override
+	public ICell getCell(int row, int col) {
+		return this.grid[row][col];
 	}
 	
 	public String toString() {

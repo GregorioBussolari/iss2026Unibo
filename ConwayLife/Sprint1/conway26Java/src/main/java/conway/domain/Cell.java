@@ -5,6 +5,10 @@ public class Cell implements ICell{
 	la classe nasconde come è fatta la cella. Principio dell'information hiding
 	classe è la rappresentazione della cella*/
 	private boolean status;
+	
+	public Cell() {
+		this.status = false;
+	}
 
 	@Override
 	public void setStatus(boolean status) {
@@ -20,6 +24,11 @@ public class Cell implements ICell{
 	public String toString() {
 		String res = status?"0":".";
 		return res;
+	}
+	
+	@Override
+	public void switchCellState() {
+		this.status = !this.status;
 	}
 	
 	
