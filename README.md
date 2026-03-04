@@ -4,7 +4,7 @@
  [Testo di riferimento:](https://anatali.github.io/issLab2026/_static/docs/Protobook.pdf)
  <!-- comment: [ancora personalizzata] -->
  
- # Chronicle [index](https://GregorioBussolari.github.io/issLab2026/chronicle/index.html)
+ # Chronicle [index](https://GregorioBussolari.github.io/iss2026Unibo/chronicle/index.html)
 
  <h2 id="ParteA">Parte A: Dai programmi ai Sistemi a Microservizi</h2>
 
