@@ -13,11 +13,13 @@ import main.java.conway.domain.IGrid;
 
 public class GridTest {
 	private IGrid g;
+	private static final int nRows=10;
+	private static final int nCols=10;
 	
 	@Before
 	public void setup() {
 		System.out.println("ConwayLifeTest setup");
-		g = new Grid(10, 10);
+		g = new Grid(nRows, nCols);
 	}
 	
 	@After
@@ -45,14 +47,14 @@ public class GridTest {
 	public void testNumRows() {
 		System.out.println("ConwayLifeTest grid num rows");
 		int rows = g.getNumRows();
-		assertTrue(rows == 10);
+		assertTrue(rows == nRows);
 	}
 	
 	@Test
 	public void testNumCols() {
 		System.out.println("ConwayLifeTest grid num cols");
 		int cols = g.getNumCols();
-		assertTrue(cols == 10);
+		assertTrue(cols == nCols);
 	}
 	
 	@Test
@@ -72,7 +74,5 @@ public class GridTest {
 			assertNull(c);
 		}
 	}
-	
-	
 
 }

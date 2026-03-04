@@ -38,6 +38,15 @@ public class Grid implements IGrid{
 	}
 	
 	@Override
+	  public void reset() {
+			for (int i = 0; i < rows; i++) {
+				for (int j = 0; j < cols; j++) {
+					grid[i][j].setStatus(false);
+				}
+			}
+	  }
+	
+	@Override
 	public ICell getCell(int row, int col) {
 		return this.grid[row][col];
 	}

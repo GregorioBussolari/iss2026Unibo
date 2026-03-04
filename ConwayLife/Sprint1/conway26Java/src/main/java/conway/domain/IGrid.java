@@ -6,4 +6,5 @@ public interface IGrid {
 	public int getNumCols();
 	public void setCellStatus(int row, int col, boolean status);
 	public ICell getCell(int row, int col);
+	public void reset();
 }

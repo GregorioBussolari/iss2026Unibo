@@ -47,26 +47,54 @@ Realizzazione del  in Java del
 <h2>Requirement analysis</h2>
 <!-- <div class="remark"> -->
 <pre>
-	Griglia di Celle:<br> 
-	Class Cell implements Interface ICell<br>
+	Che cosa intende il committente per cella?
+	Per cell dopo aver parlato con il committente formalizzo il seguente modello:<br> 
 	public interface ICell {
-		public void setStatus(boolean status);
-		public boolean isAlive();
-	}
-	Class Grid implements Interface IGrid<br>
-	public interface IGrid {
-		public boolean isCellAlive(int col, int row);
-		public int getNumRows();
-		public int getNumCols();
-		public void setCellStatus(int col, int row, boolean status);
+		
+		//PRIMITIVE
+		
+		//entità Cella ha la capacità di modificare il suo valore interno secondo un valore booleano che può essere true o false
+		void setStatus(boolean status);
+		
+		//la cella come entità ha la capacità di rispondere a una query circa la proprietà della cella di essere viva o morta
+		boolean isAlive();
+		
+		//NON PRIMITIVE
+		
+		//la cella è un ente che permette di commutare il suo stato da viva a morta o viceversa
+		void switchCellState();
+		
 	}<br>
 	
-	Le regole di gioco sono contenute nella entità Life:
-	Class Life implements LifeInterface<br>
+	Che cosa intende il committente per griglia? 
+	Si tratta di una entità composta? Se composta da cosa è composta?
+	Dai requisiti si deduce sia una entità composta da celle
+	La griglia è monodimensionale o bidimensionale (o n dimesioni)? Quali sono queste dimensioni?
+	Si tratta di una entità a due dimensioni di dimensione fissa, con righe e colonne di celle
+	
+	Per grid dopo aver parlato con il committente formalizzo il seguente modello:<br>
+	public interface IGrid {
+		
+		//PRIMITIVE
+		
+		int getRowsNum();
+		int getColsNum();
+		ICell getCell(int row, int col);
+		
+		//NON PRIMITIVE
+		
+		void setCellValue(int row, int col, boolean state);
+		boolean getCellValue(int row, int col);
+		//le celle che compongono l'entità griglia possono essere settate a stato 'morto'
+		void reset();
+		
+	}<br>
+	
+	Le regole di gioco sono contenute nella entità Life, che formalizzo nel seguente modo:<br>
 
 	public interface LifeInterface {
-		/** Calcola l'evoluzione dello stato alla generazione successiva */
-		    void nextGeneration();
+			/** Calcola l'evoluzione dello stato alla generazione successiva */
+			void nextGeneration();
 
 		    /** Restituisce lo stato di una cella specifica */
 		    boolean isAlive(int row, int col);
@@ -76,8 +104,16 @@ Realizzazione del  in Java del
 
 		    /** Restituisce il numero di righe e colonne */
 		    int getRows();
-		    int getCols();x
-	    
+		    int getCols();
+		    
+		    /** Restituisce la Cella */
+		    ICell getCell(int row, int col);
+		    
+		    /** Restituisce la grid */
+		    IGrid getGrid();
+		    
+		    /** pulisce */
+		    void resetGrid();
 	}
 
 	
@@ -90,6 +126,83 @@ Realizzazione del  in Java del
 
 <h2>Test plans</h2> 
 <!-- <div class="remark"> -->
+Test sul comportamente di Cell
+<pre>
+	@Test
+	ICell c;
+	c.setStatus(true);
+	boolean r = c.isAlive();
+	assertTrue(r);
+</pre>
+
+Test sul comportamento di Grid
+<pre>
+	private IGrid g;
+		private static final int nRows=10;
+		private static final int nCols=10;
+		
+		@Before
+		public void setup() {
+			System.out.println("ConwayLifeTest setup");
+			g = new Grid(nRows, nCols);
+		}
+		
+		@After
+		public void down() {
+			System.out.println("ConwayLifeTest down");
+		}
+		
+		@Test
+		public void testGridCellAlive() {
+			System.out.println("ConwayLifeTest grid cell alive");
+			g.setCellStatus(1, 2, true);
+			boolean r = g.isCellAlive(1, 2);
+			assertTrue(r);
+		}
+		
+		@Test
+		public void testGridCellDead() {
+			System.out.println("ConwayLifeTest grid cell dead");
+			g.setCellStatus(1, 2, false);
+			boolean r = g.isCellAlive(1, 2);
+			assertFalse(r);
+		}
+		
+		@Test
+		public void testNumRows() {
+			System.out.println("ConwayLifeTest grid num rows");
+			int rows = g.getNumRows();
+			assertTrue(rows == nRows);
+		}
+		
+		@Test
+		public void testNumCols() {
+			System.out.println("ConwayLifeTest grid num cols");
+			int cols = g.getNumCols();
+			assertTrue(cols == nCols);
+		}
+		
+		@Test
+		public void testGetCell() {
+			System.out.println("ConwayLifeTest get Cell");
+			g.setCellStatus(0, 0, true);
+			ICell c = g.getCell(0, 0);
+			assertTrue(c.isAlive());
+		}
+		
+		@Test
+		public void testGetCellNull() {
+			System.out.println("ConwayLifeTest get Cell Null");
+			int col = -5, row = -5;
+			if(!(col  >= 0 &&  row >= 0 && col < g.getNumCols() && row < g.getNumRows())) {
+				ICell c = null;
+				assertNull(c);
+			}
+		}
+		
+		
+</pre>
+
 <pre>
 @Test
 	public void testOscilla() {

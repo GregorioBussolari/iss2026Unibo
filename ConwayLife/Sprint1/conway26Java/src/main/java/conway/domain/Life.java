@@ -133,7 +133,17 @@ public class Life implements LifeInterface{
 //	                 .toArray(boolean[][]::new);
 //	}
 	
+	@Override
 	public String gridRep( ) {
 	    return currentGrid.toString();
 	}
+
+	@Override
+    public ICell getCell(int r, int c) { return gridA.getCell(r,c); }
+	
+    @Override
+    public void resetGrid() { 
+        gridA.reset();  
+        gridB.reset();  
+    }
 }
