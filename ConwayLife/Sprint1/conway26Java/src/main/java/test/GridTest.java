@@ -44,17 +44,11 @@ public class GridTest {
 	}
 	
 	@Test
-	public void testNumRows() {
+	public void testNumRowsCols() {
 		System.out.println("ConwayLifeTest grid num rows");
 		int rows = g.getNumRows();
-		assertTrue(rows == nRows);
-	}
-	
-	@Test
-	public void testNumCols() {
-		System.out.println("ConwayLifeTest grid num cols");
 		int cols = g.getNumCols();
-		assertTrue(cols == nCols);
+		assertTrue(rows == nRows && cols == nCols);
 	}
 	
 	@Test
@@ -73,6 +67,26 @@ public class GridTest {
 			ICell c = null;
 			assertNull(c);
 		}
+	}
+	
+	@Test
+	public void testReset() {
+		System.out.println("ConwayLifeTest reset");
+		
+		for (int i = 0 ; i< nRows; i++) {
+			for(int j = 0 ; j < nCols; j++) {
+				g.setCellStatus(i, j, true);
+			}
+		}
+		g.reset();
+		boolean res = false;
+		
+		for (int i = 0 ; i< nRows && res; i++) {
+			for(int j = 0 ; j < nCols && res; j++) {
+				res = res || g.isCellAlive(i, j);
+			}
+		}
+		assertFalse(res);
 	}
 
 }

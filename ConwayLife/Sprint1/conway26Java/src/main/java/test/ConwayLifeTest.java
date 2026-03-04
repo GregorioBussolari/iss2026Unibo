@@ -7,6 +7,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import main.java.conway.domain.IGrid;
 import main.java.conway.domain.Life;
 import main.java.conway.domain.LifeInterface;
 
@@ -27,6 +28,173 @@ public class ConwayLifeTest {
 	public void testRule() {
 		System.out.println("testRule");
 	}
+	
+	//test delle regole di base (4 leggi di conway)
+	
+	@Test
+	public void testSovrappopolazione() {
+		System.out.println("testSovrappopolazione ---------"  );
+		LifeInterface liferules = new Life(5, 5);
+		// Configurazione orizzontale
+	    liferules.setCell(1,1, true); 
+	    liferules.setCell(1, 2, true);
+	    liferules.setCell(1, 0, true);
+	    liferules.setCell(0, 1, true);
+	    liferules.setCell(2, 1, true);
+	    
+	    System.out.println("testSovrappopolazione | Stato Iniziale:\n" + liferules.getGrid().toString());
+	    liferules.nextGeneration();
+	    System.out.println("testSovrappopolazione | Stato Iniziale:\n" + liferules.getGrid().toString());
+	    
+	    assertFalse(liferules.isAlive(1, 1)); 
+	}
+	
+		@Test
+		public void testSottopopolazione() {
+			System.out.println("testSottopopolazione ---------"  );
+			LifeInterface liferules = new Life(5, 5);
+			// Configurazione orizzontale
+		    liferules.setCell(1,1, true); 
+		    liferules.setCell(2, 1, true);
+		    
+		    System.out.println("testSottopopolazione | Stato Iniziale:\n" + liferules.getGrid().toString());
+		    liferules.nextGeneration();
+		    System.out.println("testSottopopolazione | Stato Iniziale:\n" + liferules.getGrid().toString());
+		    
+		    assertFalse(liferules.isAlive(1, 1)); 
+		}
+		
+		@Test
+		public void testRiproduzione() {
+			System.out.println("testRiproduzione ---------"  );
+			LifeInterface liferules = new Life(5, 5);
+			// Configurazione orizzontale
+		    liferules.setCell(1,1, true); 
+		    liferules.setCell(1, 0, true);
+		    liferules.setCell(0, 0, true);
+		    liferules.setCell(2, 1, true);
+		    
+		    System.out.println("testRiproduzione | Stato Iniziale:\n" + liferules.getGrid().toString());
+		    liferules.nextGeneration();
+		    System.out.println("testRiproduzione | Stato Iniziale:\n" + liferules.getGrid().toString());
+		    
+		    assertTrue(liferules.isAlive(1, 1)); 
+		}
+		
+		@Test
+		public void testSopravvivenza() {
+			System.out.println("testSopravvivenza ---------"  );
+			LifeInterface liferules = new Life(5, 5);
+			// Configurazione orizzontale
+		    liferules.setCell(1,1, true); 
+		    liferules.setCell(1, 0, true);
+		    liferules.setCell(0, 0, true);
+		    liferules.setCell(0, 1, true);
+		    
+		    System.out.println("testSopravvivenza | Stato Iniziale:\n" + liferules.getGrid().toString());
+		    liferules.nextGeneration();
+		    System.out.println("testSopravvivenza | Stato Iniziale:\n" + liferules.getGrid().toString());
+		    
+		    assertTrue(liferules.isAlive(1, 1)); 
+		}
+		
+		
+		//testo configurazione di mondo vuoto
+		@Test
+		public void testMondoVuoto() {
+			LifeInterface liferules = new Life(5, 5);
+			IGrid g = liferules.getGrid();
+			g.reset();
+			
+			liferules.nextGeneration();
+			
+			boolean res = false;
+			for (int i = 0 ; i< g.getNumRows() && res; i++) {
+				for(int j = 0 ; j < g.getNumCols() && res; j++) {
+					res = res || g.isCellAlive(i, j);
+				}
+			}
+			assertFalse(res);
+		}
+		
+		//test controllo del funzionamento sui bordi
+		@Test
+	    public void testTopLeftCornerBehavior() {
+	        System.out.println("testTopLeftCornerBehavior ---------");
+	        LifeInterface liferules = new Life(3, 3);
+	        
+	        // Piazziamo un pattern a "L" di 3 celle vive attaccate all'angolo (0,0)
+	        liferules.setCell(0, 0, true);
+	        liferules.setCell(0, 1, true);
+	        liferules.setCell(1, 0, true);
+	        
+	        liferules.nextGeneration();
+	        
+	        assertTrue(liferules.isAlive(0, 0));
+	        assertTrue(liferules.isAlive(1, 1));
+		}
+		
+	//test per pattern tipici
+	//test oscillatore
+	@Test
+	public void testOscilla() {
+		System.out.println("testOscilla ---------"  );
+		LifeInterface liferules = new Life(5, 5);
+		// Configurazione orizzontale
+	    liferules.setCell(2, 1, true); 
+	    liferules.setCell(2, 2, true);
+	    liferules.setCell(2, 3, true);
+	    System.out.println("testOscilla | Stato Iniziale:\n" + liferules.getGrid().toString());
+
+	    liferules.nextGeneration();
+	    System.out.println("testOscilla | after 1 gen:\n" + liferules.getGrid().toString());
+	    // Verifica che sia diventato verticale
+	    assertTrue(liferules.isAlive(1, 2)); 
+	    assertTrue(liferules.isAlive(2, 2));
+	    assertTrue(liferules.isAlive(3, 2));
+	    assertFalse(liferules.isAlive(2, 1));
+
+	    liferules.nextGeneration();
+	    System.out.println("testOscilla | after 2 gen :\n" + liferules.getGrid().toString());
+	    // Verifica che sia tornato orizzontale (Periodo 2)
+	    assertTrue(liferules.isAlive(2, 1));
+	    assertTrue(liferules.isAlive(2, 2));
+	    assertTrue(liferules.isAlive(2, 3));
+	}
+	
+	//test del glider
+	@Test
+    public void testGliderTranslation() {
+        System.out.println("testGliderTranslation ---------");
+        // Usiamo una griglia 10x10 per dare spazio al Glider di muoversi
+        // senza collidere subito con i bordi.
+        LifeInterface liferules = new Life(5, 5);
+        
+        //configurazione base di un glider
+        liferules.setCell(1, 2, true);
+        liferules.setCell(2, 3, true);
+        liferules.setCell(3, 1, true);
+        liferules.setCell(3, 2, true);
+        liferules.setCell(3, 3, true);
+        
+        //test di 4 generazione del glider
+        System.out.println("testGliderTranslation | after 4 gen:\n" + liferules.getGrid().toString());
+        for (int i = 0; i < 4; i++) {
+            liferules.nextGeneration();
+        }
+        
+        System.out.println("testGliderTranslation | after 4 gen:\n" + liferules.getGrid().toString());
+        //verifica
+        assertTrue(liferules.isAlive(2, 3));
+        assertTrue(liferules.isAlive(3, 4));
+        assertTrue(liferules.isAlive(4, 2));
+        assertTrue(liferules.isAlive(4, 3));
+        assertTrue("La cella (4,4) dovrebbe essere viva", liferules.isAlive(4, 4));
+        //verifica complementare
+        assertFalse(liferules.isAlive(1, 2));
+        assertFalse(liferules.isAlive(3, 1));
+	}
+	
 	
 //	@Test
 //	public void testOscillaFromFile() throws Exception {
@@ -49,32 +217,6 @@ public class ConwayLifeTest {
 // 	    assertArrayEquals("L'oscillatore deve tornare allo stato iniziale dopo 2 passi", 
 // 	                      initial, liferules.getGrid());
 //	}
-	
-	@Test
-	public void testOscilla() {
-		System.out.println("testOscilla ---------"  );
-		LifeInterface liferules = new Life(5, 5);
-		// Configurazione orizzontale
-	    liferules.setCell(2, 1, true); 
-	    liferules.setCell(2, 2, true);
-	    liferules.setCell(2, 3, true);
-	    System.out.println("testOscilla | Stato Iniziale:\n" + liferules.gridRep());
-
-	    liferules.nextGeneration();
-	    System.out.println("testOscilla | after 1 gen:\n" + liferules.gridRep());
-	    // Verifica che sia diventato verticale
-	    assertTrue(liferules.isAlive(1, 2)); 
-	    assertTrue(liferules.isAlive(2, 2));
-	    assertTrue(liferules.isAlive(3, 2));
-	    assertFalse(liferules.isAlive(2, 1));
-
-	    liferules.nextGeneration();
-	    System.out.println("testOscilla | after 2 gen :\n" + liferules.gridRep());
-	    // Verifica che sia tornato orizzontale (Periodo 2)
-	    assertTrue(liferules.isAlive(2, 1));
-	    assertTrue(liferules.isAlive(2, 2));
-	    assertTrue(liferules.isAlive(2, 3));
-	}	
 
 	
 /*
@@ -96,7 +238,7 @@ L'approccio di testare le regole di base su configurazioni specifiche (i cosidde
 "test unitari su pattern noti") rappresenta la fondamenta del testing 
 per il Gioco della Vita. 
 
-Tuttavi la sfida nel software scientifico o simulativo è garantire che il sistema si comporti 
+Tuttavia la sfida nel software scientifico o simulativo è garantire che il sistema si comporti 
 correttamente anche su scale più ampie o in casi limite.	 
 
 #. "Pattern Canonici" Invece di inventare configurazioni, 
