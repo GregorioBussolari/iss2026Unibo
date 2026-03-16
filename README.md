@@ -13,9 +13,9 @@
  * [ConwayLife Sprint1](ConwayLife/Sprint1/conway26Java): impostazione di un primo prototipo
    in Java con dispositivi Mock di I/O. <i>Distribuzione</i>: file jar.
  * [ConwayLife Sprint2](ConwayLife/Sprint2/conway26JavaSwing): <b>evoluzione</b> del primo prototipo
-   con un dispositivo di output realizzato in Swing. <i>Distribuzione</i>: file jar
- * [ConwayLife Sprint2](conway26GuiHtml): <b>evoluzione</b> del primo prototipo
-   con un dispositivo di output realizzato in Swing. <i>Distribuzione</i>: file jar
+   con un dispositivo di output realizzato in Swing. <i>Distribuzione</i>: file jar.
+ * [ConwayLife Sprint3](conway26GuiHtml): <b>evoluzione</b> del primo prototipo
+   con un dispositivo di output come una paginaWeb (HTML/JS). Gioco come <b>servizio</b> distribuibile mediante Docker.
  ### Sistemi come servizi
  * ...
  ### Sistema ConwayLife con pagine HTML
