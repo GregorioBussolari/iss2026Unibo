@@ -1,0 +1,446 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+
+<link rel="stylesheet" type="text/css" href="css/mystyle.css">
+<!--
+    <script type="text/javascript" src="../css/issStyle.js"></script>
+-->
+    
+</head>
+   
+<title>conway26Java_v0</title></head>
+    
+
+<body>
+<div id="top">
+<h1>ConwayLife Sprint1</h1>
+</div>  
+
+<div class="body">  
+
+<h2>Introduction</h2>
+Realizzazione del  in Java del
+<a href='https://anatali.github.io/issLab2026/_static/docs/Protobook.pdf#chapter.6'>GAME OF LIFE DI CONWAY</a>
+ 
+<h2>Requirements</h2>
+
+ 
+<!-- <div class="remark"> -->
+<pre>
+    R1: Realizzare una versione in Java del gioco Life di Conway, come gioco zero-player. 
+    Il gioco consiste nell’introdurre una Griglia di Celle il cui stato (cella ‘viva’ o cella ‘morta’) 
+    evolve come stabilito dallle regole di ConwayLife
+
+    R2: L’utente umano deve poter:
+     - specificare la configurazione iniziale della griglia del gioco	
+     - vedere l’evoluzione del gioco in forma opportuna 
+        (si veda <a href='https://anatali.github.io/issLab2026/_static/docs/Protobook.pdf#section.6.3'>Problema della vista del gioco</a> )
+     - fermare e far ripartire l’evoluzione del gioco
+     - pulire (a gioco fermo) la configurazione della griglia del gioco
+
+</pre>
+ 
+
+ 
+
+<h2>Requirement analysis</h2>
+Che cosa intende il committente per cella?<br> 
+Per cell dopo aver parlato con il committente formalizzo il seguente modello:<br> 
+<!-- <div class="remark"> -->
+<pre>
+	public interface ICell {
+		
+		//PRIMITIVE
+		
+		//entità Cella ha la capacità di modificare il suo valore interno secondo un valore booleano che può essere true o false
+		void setStatus(boolean status);
+		
+		//la cella come entità ha la capacità di rispondere a una query circa la proprietà della cella di essere viva o morta
+		boolean isAlive();
+		
+		//NON PRIMITIVE
+		
+		//la cella è un ente che permette di commutare il suo stato da viva a morta o viceversa
+		void switchCellState();
+		
+	}<br>
+</pre>	
+	Che cosa intende il committente per griglia? <br> 
+	Si tratta di una entità composta? Se composta da cosa è composta?<br> 
+	Dai requisiti si deduce sia una entità composta da celle<br> 
+	La griglia è monodimensionale o bidimensionale (o n dimesioni)? Quali sono queste dimensioni?<br> 
+	Si tratta di una entità a due dimensioni di dimensione fissa, con righe e colonne di celle<br> 
+	
+	Per grid dopo aver parlato con il committente formalizzo il seguente modello:<br>
+<pre>
+
+	public interface IGrid {
+		
+		//PRIMITIVE
+		
+
+		//La griglia in quanto entità bidimensionale di celle permette di ottenere il numero di righe o colonne
+		int getRowsNum();
+		int getColsNum();
+
+		//In quanto entità composta da celle permette di ottenere una specifica cella date le coordinate
+		ICell getCell(int row, int col);
+		
+
+		//NON PRIMITIVE
+		
+
+		//Imposta il valore della cella ad uno specifico valore
+		void setCellValue(int row, int col, boolean state);
+
+		//Permette di ottenere lo stato attuale di una cella specificata
+		boolean getCellValue(int row, int col);
+
+		//le celle che compongono l'entità griglia possono essere settate a stato 'morto'
+		void reset();
+		
+	}<br>
+</pre>
+	Le regole di gioco sono contenute nella entità Life, che formalizzo nel seguente modo:<br>
+<pre>
+	public interface LifeInterface {
+
+		//PRIMITIVE
+
+		// Calcola l'evoluzione dello stato alla generazione successiva
+		void nextGeneration();
+
+		// Restituisce la grid corrente
+		IGrid getGrid();
+
+
+		//NON PRIMITIVE
+
+		//Imposta lo stato di una cella
+		void setCell(int row, int col, boolean alive);
+
+		//Restituisce il numero di righe e colonne
+		int getRows();
+		int getCols();
+
+		// Restituisce lo stato di una cella specifica 
+		boolean isAlive(int row, int col);
+
+		// Restituisce la Cella della griglia 
+		ICell getCell(int row, int col);
+
+		// Le celle che compongono la disposizone corrente essere settate a stato 'morto'
+		void resetGrid();
+	}
+
+	
+	
+</pre>
+
+
+<h2>Problem analysis</h2>
+<img src="./img/LifeGameJava+.jpg">
+
+<h2>Test plans</h2> 
+<!-- <div class="remark"> -->
+Test del comportamento atteso da Cell
+<pre>
+
+	private ICell c; // definisco un simbolo che rispetta il constratto delle ICell
+	
+	@Test
+	public void testCellAlive() {
+		System.out.println("ConwayLifeTest doing alive");
+		c.setStatus(true);
+		boolean r = c.isAlive();
+		assertTrue(r);
+	}
+	
+	@Test
+	public void testCellDead() {
+		System.out.println("ConwayLifeTest doing dead");
+		c.setStatus(false);
+		boolean r = c.isAlive();
+		assertFalse(r);
+	}
+</pre>
+
+Test del comportamento atteso da Grid
+<pre>
+
+		private IGrid g;
+		private static final int nRows=10;
+		private static final int nCols=10;
+		
+		@Test
+		public void testGridCellAlive() {
+			System.out.println("ConwayLifeTest grid cell alive");
+			g.setCellStatus(1, 2, true);
+			boolean r = g.isCellAlive(1, 2);
+			assertTrue(r);
+		}
+		
+		@Test
+		public void testGridCellDead() {
+			System.out.println("ConwayLifeTest grid cell dead");
+			g.setCellStatus(1, 2, false);
+			boolean r = g.isCellAlive(1, 2);
+			assertFalse(r);
+		}
+		
+		@Test
+		public void testNumRowsCols() {
+			System.out.println("ConwayLifeTest grid num rows");
+			int rows = g.getNumRows();
+			int cols = g.getNumCols();
+			assertTrue(rows == nRows && cols == nCols);
+		}
+		
+		@Test
+		public void testGetCell() {
+			System.out.println("ConwayLifeTest get Cell");
+			g.setCellStatus(0, 0, true);
+			ICell c = g.getCell(0, 0);
+			assertTrue(c.isAlive());
+		}
+		
+		@Test
+		public void testGetCellNull() {
+			System.out.println("ConwayLifeTest get Cell Null");
+			int col = -5, row = -5;
+			if(!(col  >= 0 &&  row >= 0 && col < g.getNumCols() && row < g.getNumRows())) {
+				ICell c = null;
+				assertNull(c);
+			}
+		}
+
+		@Test
+		public void testReset() {
+			System.out.println("ConwayLifeTest reset");
+			
+			for (int i = 0 ; i< nRows; i++) {
+				for(int j = 0 ; j < nCols; j++) {
+					g.setCellStatus(i, j, true);
+				}
+			}
+			g.reset();
+			boolean res = false;
+			
+			for (int i = 0 ; i< nRows && res; i++) {
+				for(int j = 0 ; j < nCols && res; j++) {
+					res = res || g.isCellAlive(i, j);
+				}
+			}
+			assertFalse(res);
+		}
+		
+		
+</pre>
+Test del comportamento atteso da Life
+<pre>
+	//@Test
+	public void testRule() {
+		System.out.println("testRule");
+	}
+	
+		//test delle regole di base (4 leggi di conway)
+		
+			@Test
+			public void testSovrappopolazione() {
+				System.out.println("testSovrappopolazione ---------"  );
+				LifeInterface liferules = new Life(5, 5);
+				// Configurazione orizzontale
+				liferules.setCell(1,1, true); 
+				liferules.setCell(1, 2, true);
+				liferules.setCell(1, 0, true);
+				liferules.setCell(0, 1, true);
+				liferules.setCell(2, 1, true);
+				
+				System.out.println("testSovrappopolazione | Stato Iniziale:\n" + liferules.getGrid().toString());
+				liferules.nextGeneration();
+				System.out.println("testSovrappopolazione | Stato Iniziale:\n" + liferules.getGrid().toString());
+				
+				assertFalse(liferules.isAlive(1, 1)); 
+			}
+	
+		@Test
+		public void testSottopopolazione() {
+			System.out.println("testSottopopolazione ---------"  );
+			LifeInterface liferules = new Life(5, 5);
+			// Configurazione orizzontale
+		    liferules.setCell(1,1, true); 
+		    liferules.setCell(2, 1, true);
+		    
+		    System.out.println("testSottopopolazione | Stato Iniziale:\n" + liferules.getGrid().toString());
+		    liferules.nextGeneration();
+		    System.out.println("testSottopopolazione | Stato Iniziale:\n" + liferules.getGrid().toString());
+		    
+		    assertFalse(liferules.isAlive(1, 1)); 
+		}
+		
+		@Test
+		public void testRiproduzione() {
+			System.out.println("testRiproduzione ---------"  );
+			LifeInterface liferules = new Life(5, 5);
+			// Configurazione orizzontale
+		    liferules.setCell(1,1, true); 
+		    liferules.setCell(1, 0, true);
+		    liferules.setCell(0, 0, true);
+		    liferules.setCell(2, 1, true);
+		    
+		    System.out.println("testRiproduzione | Stato Iniziale:\n" + liferules.getGrid().toString());
+		    liferules.nextGeneration();
+		    System.out.println("testRiproduzione | Stato Iniziale:\n" + liferules.getGrid().toString());
+		    
+		    assertTrue(liferules.isAlive(1, 1)); 
+		}
+		
+		@Test
+		public void testSopravvivenza() {
+			System.out.println("testSopravvivenza ---------"  );
+			LifeInterface liferules = new Life(5, 5);
+			// Configurazione orizzontale
+		    liferules.setCell(1,1, true); 
+		    liferules.setCell(1, 0, true);
+		    liferules.setCell(0, 0, true);
+		    liferules.setCell(0, 1, true);
+		    
+		    System.out.println("testSopravvivenza | Stato Iniziale:\n" + liferules.getGrid().toString());
+		    liferules.nextGeneration();
+		    System.out.println("testSopravvivenza | Stato Iniziale:\n" + liferules.getGrid().toString());
+		    
+		    assertTrue(liferules.isAlive(1, 1)); 
+		}
+		
+		
+		//testo configurazione di mondo vuoto
+		@Test
+		public void testMondoVuoto() {
+			LifeInterface liferules = new Life(5, 5);
+			IGrid g = liferules.getGrid();
+			g.reset();
+			
+			liferules.nextGeneration();
+			
+			boolean res = false;
+			for (int i = 0 ; i< g.getNumRows() && res; i++) {
+				for(int j = 0 ; j < g.getNumCols() && res; j++) {
+					res = res || g.isCellAlive(i, j);
+				}
+			}
+			assertFalse(res);
+		}
+		
+		//test controllo del funzionamento sui bordi
+		@Test
+	    public void testTopLeftCornerBehavior() {
+	        System.out.println("testTopLeftCornerBehavior ---------");
+	        LifeInterface liferules = new Life(3, 3);
+	        
+	        // Piazziamo un pattern a "L" di 3 celle vive attaccate all'angolo (0,0)
+	        liferules.setCell(0, 0, true);
+	        liferules.setCell(0, 1, true);
+	        liferules.setCell(1, 0, true);
+	        
+	        liferules.nextGeneration();
+	        
+	        assertTrue(liferules.isAlive(0, 0));
+	        assertTrue(liferules.isAlive(1, 1));
+		}
+		
+	//test per pattern tipici
+	//test oscillatore
+	@Test
+	public void testOscilla() {
+		System.out.println("testOscilla ---------"  );
+		LifeInterface liferules = new Life(5, 5);
+		// Configurazione orizzontale
+	    liferules.setCell(2, 1, true); 
+	    liferules.setCell(2, 2, true);
+	    liferules.setCell(2, 3, true);
+	    System.out.println("testOscilla | Stato Iniziale:\n" + liferules.getGrid().toString());
+
+	    liferules.nextGeneration();
+	    System.out.println("testOscilla | after 1 gen:\n" + liferules.getGrid().toString());
+	    // Verifica che sia diventato verticale
+	    assertTrue(liferules.isAlive(1, 2)); 
+	    assertTrue(liferules.isAlive(2, 2));
+	    assertTrue(liferules.isAlive(3, 2));
+	    assertFalse(liferules.isAlive(2, 1));
+
+	    liferules.nextGeneration();
+	    System.out.println("testOscilla | after 2 gen :\n" + liferules.getGrid().toString());
+	    // Verifica che sia tornato orizzontale (Periodo 2)
+	    assertTrue(liferules.isAlive(2, 1));
+	    assertTrue(liferules.isAlive(2, 2));
+	    assertTrue(liferules.isAlive(2, 3));
+	}
+	
+	//test del glider
+	@Test
+    public void testGliderTranslation() {
+        System.out.println("testGliderTranslation ---------");
+        // Usiamo una griglia 10x10 per dare spazio al Glider di muoversi
+        // senza collidere subito con i bordi.
+        LifeInterface liferules = new Life(5, 5);
+        
+        //configurazione base di un glider
+        liferules.setCell(1, 2, true);
+        liferules.setCell(2, 3, true);
+        liferules.setCell(3, 1, true);
+        liferules.setCell(3, 2, true);
+        liferules.setCell(3, 3, true);
+        
+        //test di 4 generazione del glider
+        System.out.println("testGliderTranslation | after 4 gen:\n" + liferules.getGrid().toString());
+        for (int i = 0; i < 4; i++) {
+            liferules.nextGeneration();
+        }
+        
+        System.out.println("testGliderTranslation | after 4 gen:\n" + liferules.getGrid().toString());
+        //verifica
+        assertTrue(liferules.isAlive(2, 3));
+        assertTrue(liferules.isAlive(3, 4));
+        assertTrue(liferules.isAlive(4, 2));
+        assertTrue(liferules.isAlive(4, 3));
+        assertTrue("La cella (4,4) dovrebbe essere viva", liferules.isAlive(4, 4));
+        //verifica complementare
+        assertFalse(liferules.isAlive(1, 2));
+        assertFalse(liferules.isAlive(3, 1));
+	}
+	
+</pre>
+<h2>Project</h2> 
+ 
+ 
+
+<h2>Testing</h2> 
+ 
+
+<h2>Deployment</h2> 
+
+ 
+<h2>Maintenance</h2> 
+ 
+<!-- USEFUL
+<table style="width:100%" border="1">
+<tr>
+<td style="width:50%">
+</td>
+<td></td>
+</tr>
+</table>
+-->
+	      	
+<br/><br/> 	
+</div>  
+
+<div style="background-color:rgba(86, 56, 253, 0.9); width:60%;text-align:left;color:white">
+By studentName email: gregorio.bussolari@studio.unibo.it, 
+<!-- <img src="./img/mbot-S.jpg" alt="mbot" width="15%" height="15%"> -->
+<img src="./img/me.JPG" alt="greg" width="15%" height="15%">
+GIT repo: https://github.com/GregorioBussolari/iss2026Unibo.git 
+</div> 
+</body>
+</html>
