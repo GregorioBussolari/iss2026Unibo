@@ -14,6 +14,8 @@
    in Java con dispositivi Mock di I/O. <i>Distribuzione</i>: file jar.
  * [ConwayLife Sprint2](ConwayLife/Sprint2/conway26JavaSwing): <b>evoluzione</b> del primo prototipo
    con un dispositivo di output realizzato in Swing. <i>Distribuzione</i>: file jar
+ * [ConwayLife Sprint2](conway26GuiHtml): <b>evoluzione</b> del primo prototipo
+   con un dispositivo di output realizzato in Swing. <i>Distribuzione</i>: file jar
  ### Sistemi come servizi
  * ...
  ### Sistema ConwayLife con pagine HTML
