@@ -12,7 +12,7 @@
  [Riferimento: conway26Java Dai requisiti al deployment](https://GregorioBussolari.github.io/iss2026Unibo/Project%20conway26Java.html#conway26java-dai-requisiti-al-deployment)
  * [ConwayLife Sprint1](ConwayLife/Sprint1/conway26Java): impostazione di un primo prototipo
    in Java con dispositivi Mock di I/O. <i>Distribuzione</i>: file jar.
- * [ConwayLife Sprint2](ConwayLife/Sprint2/conway26Java): <b>evoluzione</b> del primo prototipo
+ * [ConwayLife Sprint2](ConwayLife/Sprint2/conway26JavaSwing): <b>evoluzione</b> del primo prototipo
    con un dispositivo di output realizzato in Swing. <i>Distribuzione</i>: file jar
  ### Sistemi come servizi
  * ...
