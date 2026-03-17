@@ -21,7 +21,8 @@
 
 <h2>Introduction</h2>
 Realizzazione del  in Java del
-<a href='https://anatali.github.io/issLab2026/_static/docs/Protobook.pdf#chapter.6'>GAME OF LIFE DI CONWAY</a>
+<a href='https://anatali.github.io/issLab2026/_static/docs/Protobook.pdf#chapter.6'>GAME OF LIFE DI CONWAY</a>. <br>
+La GUI deve essere una pagina HTML che dovrebbe essere fornita da un Web-server.
  
 <h2>Requirements</h2>
 
@@ -140,7 +141,7 @@ Per cell dopo aver parlato con il committente formalizzo il seguente modello:<br
 
 
 <h2>Problem analysis</h2>
-<img src="./img/LifeGameJava+.jpg">
+<img src="./img/LifeGameHtml.png">
 
 <h2>Test plans</h2> 
 <!-- <div class="remark"> -->
@@ -419,7 +420,17 @@ Test del comportamento atteso da Life
  
 
 <h2>Deployment</h2> 
+Deployed mediante Docker, secondo il dockerfile:
 
+FROM eclipse-temurin:17.0.5_8-jre-focal AS builder
+## ADD extracts the tar
+ADD ../build/distributions/conway26GuiHtml-1.0.tar /
+WORKDIR /conway26GuiHtml-1.0/bin
+
+## RUN apt-get update -y
+
+
+CMD ["bash", "conway26GuiHtml"]
  
 <h2>Maintenance</h2> 
  
