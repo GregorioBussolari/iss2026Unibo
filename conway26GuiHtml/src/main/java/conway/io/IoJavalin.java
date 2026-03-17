@@ -178,14 +178,14 @@ public class IoJavalin implements IOutDev{
 	
 	@Override
 	public void display(String msg) {
-		if (pageCtx != null && pageCtx.session.isOpen()) {
+		if (pageCtx != null) {
 	        pageCtx.send(msg);
 	    }
 	}
 
 	@Override
 	public void displayCell(IGrid grid, int x, int y) {
-		if (pageCtx != null && pageCtx.session.isOpen()) {
+		if (pageCtx != null) {
 	        int state = grid.getCell(x, y).isAlive() ? 0 : 1;
 	        String payload = "cell(" + x + "," + y + "," + state + ")";
 //	        IApplMessage cellMessage = CommUtils.buildDispatch("server", 
@@ -198,14 +198,14 @@ public class IoJavalin implements IOutDev{
 
 	@Override
 	public void close() {
-		if (pageCtx != null && pageCtx.session.isOpen()) {
+		if (pageCtx != null) {
 	        pageCtx.session.close();
 	    }
 	}
 
 	@Override
 	public void displayGrid(IGrid grid) {
-		if (pageCtx != null && pageCtx.session.isOpen()) {
+		if (pageCtx != null) {
 			int rows = grid.getNumRows();
 	        int cols = grid.getNumCols();
 
