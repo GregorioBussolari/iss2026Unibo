@@ -14,7 +14,7 @@
 
 <body>
 <div id="top">
-<h1>ConwayLife Sprint1</h1>
+<h1>ConwayLife Sprint3</h1>
 </div>  
 
 <div class="body">  
@@ -30,7 +30,6 @@ Nel presente <b>Sprint 3</b> la GUI deve essere realizzata attraverso una pagina
  
 <!-- <div class="remark"> -->
 <pre>
-    Il committente fissa i seguenti requisiti:
 	1. dotare il gioco Life. di una pagina HTML come dispositivo di I/O
 	2. la pagina deve costituire un componente esterno alla applicazione secondo la architettura riportata in IoJavalin
 	esterno alla applicazione
@@ -42,13 +41,23 @@ Nel presente <b>Sprint 3</b> la GUI deve essere realizzata attraverso una pagina
 	6. opzionalmente: la pagina HTML deve indicare se il gioco continua anche nel caso di griglia vuota o di config-
 	urazione tabile
 	7. il deployment del gioco deve avvenire mediante Docker.
-
 </pre>
  
 
  
 
 <h2>Requirement analysis</h2>
+
+Si formalizza il dispositivo di IO per la comunicazione applicazione-server nel seguente modo:
+<!-- <div class="remark"> -->
+	<pre>
+		public interface IOutDev {
+			public void display(String msg);      //For HMI
+			public void displayCell(IGrid grid, int x, int y);   
+			public void close();
+			public void displayGrid(IGrid grid);
+		}
+	</pre>
 
 <h2>Problem analysis</h2>
 <img src="./img/LifeGameHtml.png">

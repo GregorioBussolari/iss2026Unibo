@@ -35,8 +35,6 @@ public class LifeGameInteraction  {
  	   ((OutInGuiInteraction) iodevgui).setController(cc);          //iniezione del controller nella GUI
  	}
 
-
-     
     
     public static void main(String[] args) throws Exception {
     	System.out.println("LifeGameInteraction Java.version="+ System.getProperty("java.version"));
