@@ -17,7 +17,7 @@
  * [ConwayLife Sprint3](ConwayLife/Sprint3/conway26GuiHtml): <b>evoluzione</b> del primo prototipo
    con un dispositivo di output come una paginaWeb (HTML/JS). Gioco come <b>servizio</b> distribuibile mediante Docker.
  ### Sistemi come servizi
- * ...
+ * [Sistema S Javalin](FunctionEvalService/SistemaSJavalin): Funzione eval come Servizio Javalin
  ### Sistema ConwayLife con pagine HTML
  * [ConwayLife Sprint3(ConwayLife/Sprint3/conway26Java): evoluzione del sistema in locale
    usando una pagina HTML come dispositivo di I/O. <i>Distribuzione</i>: Docker yaml.
