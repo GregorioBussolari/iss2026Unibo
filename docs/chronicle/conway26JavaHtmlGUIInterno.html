@@ -1,0 +1,121 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+
+<link rel="stylesheet" type="text/css" href="css/mystyle.css">
+<!--
+    <script type="text/javascript" src="../css/issStyle.js"></script>
+-->
+    
+</head>
+   
+<title>conway26Java_v0</title></head>
+    
+
+<body>
+<div id="top">
+<h1>ConwayLife Sprint3</h1>
+</div>  
+
+<div class="body">  
+
+<h2>Introduction</h2>
+Realizzazione del  in Java del
+<a href='https://anatali.github.io/issLab2026/_static/docs/Protobook.pdf#chapter.6'>GAME OF LIFE DI CONWAY</a>, 
+cui analisi del dominio applicativo è stata svolta nello <a href= "conway26Java_v0.html">Sprint 1</a> <br>
+Nel presente <b>Sprint 3</b> la GUI deve essere realizzata attraverso una pagina HTML fornita da un Web-server.
+ 
+<h2>Requirements</h2>
+
+ 
+<!-- <div class="remark"> -->
+<pre>
+	R1. dotare il gioco Life. di una pagina HTML come dispositivo di I/O
+	R2. la pagina deve costituire un componente interno alla applicazione secondo la architettura riportata in IoJavalin
+	interno alla applicazione
+	R3. il gestore del gioco sarà l'utente che ha aperto per primo (owner) una pagina HTML collegata al gioco. . In altre
+	parole, solo la pagina dell'owner avrà pulsanti di comando START/STOP/CLEAN/EXIT attivi
+	R4. la pagina HTML deve essere aggiornata in modo automatico man mano il gioco procede
+	R5. un utente non owner che si collega mentre il gioco è in corso, dovrebbe vedere lo stato attuale della griglia in
+	modo corretto
+	R6. opzionalmente: la pagina HTML deve indicare se il gioco continua anche nel caso di griglia vuota o di configurazione table
+	R7. il deployment del gioco deve avvenire mediante Docker.
+</pre>
+ 
+
+ 
+
+<h2>Requirement analysis</h2>
+
+Considerando quanto ottenuto dall'analisi conseguita <a href= "conway26Java_v0.html">Sprint 1</a>, si vuole fare in modo che LifeController
+sia pilotato tramite una pagina HTML. Tale pagina HTML deve essere fruita attraverso un browser 
+e pertanto veicolata attraverso un server. 
+<br>
+In relazione al requisito <b>R2:</b> è necessario estendere il sistema sw in modo tale che la GUI possa essere
+erogata da un server Javalin che farà parte integrante dell'applicazione, in quanto <b>sistema concentrato</b>.
+<br>
+
+In base al requisito <b>R3</b>, l'owner deve poter interagire con il browser il quale comunicherà con LifeController
+per mezzo della mediazione del server interno all'applicazione.
+
+Pertanto, la classe OutInWs deve implementare <a href= "https://github.com/GregorioBussolari/iss2026Unibo/blob/main/ConwayLife/Sprint1/conway26Java/src/main/java/conway/domain/IOutDev.java">IOutDev</a>, definita in fase di analisi nello sprint 1
+e di fatto coinciderà con l'implementazione di IoJavalin.
+
+<h2>Problem analysis</h2>
+<img src="./img/LifeGameHTMLInterno.png">
+<br>
+
+IoJavalin Implementa i metodi dell'interfaccia <a href= "https://github.com/GregorioBussolari/iss2026Unibo/blob/main/ConwayLife/Sprint1/conway26Java/src/main/java/conway/domain/IOutDev.java">IOutDev</a> e 
+inoltre definisce un metodo per iniettare il riferimento a LifeController, con cui avviene la comunicazione:
+
+<!-- <div class="remark"> -->
+<pre>
+	public void setController(GameController controller) {
+		this.controller = controller;
+	}
+</pre>	
+La comunicazione con il browser invece è bidirezionale e deve rimanere aperta per tutta la comunicazione con il browser.
+Pertanto va aperta una connessione webSocket con il browser. I messaggi inviati sulla WebSocket con il browser
+sono semplici stringhe, che formalizzo come segue:
+
+<!-- <div class="remark"> -->
+<pre>
+	D:name //par dare il valore name al nome della pagina
+	cell(X,Y) //per commutare lo stato di una cella (griglia granulare)
+	[[false,false, ... ]] //per specificare lo stato di una griglia globale
+</pre>	
+
+
+<h2>Test plans</h2> 
+
+<h2>Project</h2> 
+
+<h2>Testing</h2> 
+ 
+
+<h2>Deployment</h2> 
+Deployed mediante Docker.
+ 
+<h2>Maintenance</h2> 
+ 
+<!-- USEFUL
+<table style="width:100%" border="1">
+<tr>
+<td style="width:50%">
+</td>
+<td></td>
+</tr>
+</table>
+-->
+	      	
+<br/><br/> 	
+</div>  
+
+<div style="background-color:rgba(86, 56, 253, 0.9); width:60%;text-align:left;color:white">
+By studentName email: gregorio.bussolari@studio.unibo.it, 
+<!-- <img src="./img/mbot-S.jpg" alt="mbot" width="15%" height="15%"> -->
+<img src="./img/me.JPG" alt="greg" width="15%" height="15%">
+GIT repo: https://github.com/GregorioBussolari/iss2026Unibo.git 
+</div> 
+</body>
+</html>

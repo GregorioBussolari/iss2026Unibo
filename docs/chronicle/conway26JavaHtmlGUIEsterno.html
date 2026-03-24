@@ -48,16 +48,12 @@ Nel presente <b>Sprint 3</b> la GUI deve essere realizzata attraverso una pagina
 
 <h2>Requirement analysis</h2>
 
-Si formalizza il dispositivo di IO per la comunicazione applicazione-server nel seguente modo:
-<!-- <div class="remark"> -->
-	<pre>
-		public interface IOutDev {
-			public void display(String msg);      //For HMI
-			public void displayCell(IGrid grid, int x, int y);   
-			public void close();
-			public void displayGrid(IGrid grid);
-		}
-	</pre>
+Considerando quanto ottenuto dall'analisi conseguita Sprint 1, si vuole fare in modo che LifeController
+sia pilotato tramite una pagina HTML. Tale pagina HTML deve essere fruita attraverso un browser 
+e pertanto veicolata attraverso un server. 
+
+<b>R2:</b> Questo requisito impone di estendere il sistema sw in modo tale che la GUi viene 
+erogato da un server Javalin che farà parte integrante dell'applicazione.
 
 <h2>Problem analysis</h2>
 <img src="./img/LifeGameHtml.png">
