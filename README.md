@@ -14,8 +14,10 @@
    in Java con dispositivi Mock di I/O. <i>Distribuzione</i>: file jar.
  * [ConwayLife Sprint2](ConwayLife/Sprint2/conway26JavaSwing): <b>evoluzione</b> del primo prototipo
    con un dispositivo di output realizzato in Swing. <i>Distribuzione</i>: file jar.
- * [ConwayLife Sprint3](ConwayLife/Sprint3/conway26GuiHtml): <b>evoluzione</b> del primo prototipo
-   con un dispositivo di output come una paginaWeb (HTML/JS). Gioco come <b>servizio</b> distribuibile mediante Docker.
+ * [ConwayLife Sprint3.0 - Interno](conway26GuiHtml): <b>evoluzione</b> del primo prototipo
+   con un dispositivo di output come una paginaWeb (HTML/JS). Realizzazione di Javalin come <b>componente interno</b> alla applicazione. Gioco come <b>servizio</b> distribuibile mediante Docker.
+ * [ConwayLife Sprint3.1 - Esterno](ConwayLife/Sprint3/conway26GuiHtml): <b>evoluzione</b> del primo prototipo
+   con un dispositivo di output come una paginaWeb (HTML/JS). Realizzazione di Javalin come <b>componente esterno</b> alla applicazione. Gioco come <b>servizio</b> distribuibile mediante Docker.
  ### Sistemi come servizi
  * [Sistema S Javalin](FunctionEvalService/SistemaSJavalin): Funzione eval come Servizio Javalin
  ### Sistema ConwayLife con pagine HTML
