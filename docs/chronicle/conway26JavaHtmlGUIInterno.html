@@ -27,64 +27,66 @@ Nel presente <b>Sprint 3</b> la GUI deve essere realizzata attraverso una pagina
  
 <h2>Requirements</h2>
 
- 
-<!-- <div class="remark"> -->
-<pre>
-	R1. dotare il gioco Life. di una pagina HTML come dispositivo di I/O
-	R2. la pagina deve costituire un componente interno alla applicazione secondo la architettura riportata in IoJavalin
-	interno alla applicazione
-	R3. il gestore del gioco sarà l'utente che ha aperto per primo (owner) una pagina HTML collegata al gioco. . In altre
-	parole, solo la pagina dell'owner avrà pulsanti di comando START/STOP/CLEAN/EXIT attivi
-	R4. la pagina HTML deve essere aggiornata in modo automatico man mano il gioco procede
-	R5. un utente non owner che si collega mentre il gioco è in corso, dovrebbe vedere lo stato attuale della griglia in
-	modo corretto
-	R6. opzionalmente: la pagina HTML deve indicare se il gioco continua anche nel caso di griglia vuota o di configurazione table
-	R7. il deployment del gioco deve avvenire mediante Docker.
-</pre>
- 
+	<ol>
+ 	<li>dotare il gioco Life. di una pagina HTML come dispositivo di I/O
+		<li>la pagina deve costituire un componente interno alla applicazione secondo la architettura riportata in IoJavalin
+		interno alla applicazione
+		<li>il gestore del gioco sarà l'utente che ha aperto per primo (owner) una pagina HTML collegata al gioco. . In altre
+		parole, solo la pagina dell'owner avrà pulsanti di comando START/STOP/CLEAN/EXIT attivi
+		<li>la pagina HTML deve essere aggiornata in modo automatico man mano il gioco procede
+		<li>un utente non owner che si collega mentre il gioco è in corso, dovrebbe vedere lo stato attuale della griglia in
+		modo corretto
+		<li>il deployment del gioco deve avvenire mediante Docker.
+	</ol>
 
  
 
 <h2>Requirement analysis</h2>
 
-Considerando quanto ottenuto dall'analisi conseguita <a href= "conway26Java_v0.html">Sprint 1</a>, si vuole fare in modo che LifeController
-sia pilotato tramite una pagina HTML. Tale pagina HTML deve essere fruita attraverso un browser 
-e pertanto veicolata attraverso un server. 
-<br>
-In relazione al requisito <b>R2:</b> è necessario estendere il sistema sw in modo tale che la GUI possa essere
-erogata da un server Javalin che farà parte integrante dell'applicazione, in quanto <b>sistema concentrato</b>.
-<br>
+<ul>
+	<li>Considerando quanto ottenuto dall'analisi conseguita <a href= "conway26Java_v0.html">Sprint 1</a>, si vuole fare in modo che LifeController
+	sia pilotato tramite una pagina HTML. Tale pagina HTML deve essere fruita attraverso un browser 
+	e pertanto veicolata attraverso un server. 
+	
+	<li>In relazione al requisito <b>R2:</b> è necessario estendere il sistema sw in modo tale che la GUI possa essere
+	erogata da un server Javalin che farà parte integrante dell'applicazione, in quanto <b>sistema concentrato</b>.
+	<br>
+	<img src="./img/LifeGameHTMLInterno.png">
+	<br>
+	Il componente che utilizza il server viene indicato come IOJavalin
 
-In base al requisito <b>R3</b>, l'owner deve poter interagire con il browser il quale comunicherà con LifeController
-per mezzo della mediazione del server interno all'applicazione.
+	<li>IoJavalin è parte di un oggetto OutInWs che implementa i metodi dell'interfaccia <a href= "https://github.com/GregorioBussolari/iss2026Unibo/blob/main/ConwayLife/Sprint1/conway26Java/src/main/java/conway/domain/IOutDev.java">IOutDev</a> e 
+		inoltre definisce un metodo per iniettare il riferimento a LifeController, con cui avviene la comunicazione:
+		
+		<!-- <div class="remark"> -->
+		<pre>
+			public void setController(GameController controller) {
+				this.controller = controller;
+			}
+		</pre>	
+	<br>Pertanto, la classe OutInWs deve implementare <a href= "https://github.com/GregorioBussolari/iss2026Unibo/blob/main/ConwayLife/Sprint1/conway26Java/src/main/java/conway/domain/IOutDev.java">IOutDev</a>, definita in fase di analisi nello sprint 1
+	permettendo ad IOJavalin di abilitare la comunicazione con LifeController e di attivare i metodi di LifeController quando riceve (via WS) comandi dalla pagina.
 
-Pertanto, la classe OutInWs deve implementare <a href= "https://github.com/GregorioBussolari/iss2026Unibo/blob/main/ConwayLife/Sprint1/conway26Java/src/main/java/conway/domain/IOutDev.java">IOutDev</a>, definita in fase di analisi nello sprint 1
-e di fatto coinciderà con l'implementazione di IoJavalin.
-
+	<li>In base al requisito <b>R2 ed R3</b>, l'utente deve poter interagire con il browser il quale comunicherà con LifeController
+	per mezzo della mediazione del server interno all'applicazione.<br>
+	Il browser è comunque esterno all'applicazione, pertanto può essere deciso in questa fase se, al lancio dell'applicazione:<br>
+	1. Venga attivato in modo automatico un browser locale così che la pagina HTML possa comparire in modo automatico<br>
+	2. Non avvia la pagina in automatico ma accedendo ad un browser locale con localhost:8080, si ottiene la pagina.
+	</ul>
 <h2>Problem analysis</h2>
-<img src="./img/LifeGameHTMLInterno.png">
-<br>
-
-IoJavalin Implementa i metodi dell'interfaccia <a href= "https://github.com/GregorioBussolari/iss2026Unibo/blob/main/ConwayLife/Sprint1/conway26Java/src/main/java/conway/domain/IOutDev.java">IOutDev</a> e 
-inoltre definisce un metodo per iniettare il riferimento a LifeController, con cui avviene la comunicazione:
-
-<!-- <div class="remark"> -->
-<pre>
-	public void setController(GameController controller) {
-		this.controller = controller;
-	}
-</pre>	
-La comunicazione con il browser invece è bidirezionale e deve rimanere aperta per tutta la comunicazione con il browser.
+La comunicazione con il browser invece è bidirezionale e deve rimanere aperta per tutto il tempo necessario.
 Pertanto va aperta una connessione webSocket con il browser. I messaggi inviati sulla WebSocket con il browser
 sono semplici stringhe, che formalizzo come segue:
-
-<!-- <div class="remark"> -->
+<br>
+Dispatch message Browser - Server
 <pre>
-	D:name //par dare il valore name al nome della pagina
-	cell(X,Y) //per commutare lo stato di una cella (griglia granulare)
-	[[false,false, ... ]] //per specificare lo stato di una griglia globale
+	msg( eval, dispatch, SENDER, lifectrl, CMD, 0 )
+	CMD = "start", 
+		"stop", 
+		"exit", 
+		"clear",
+		cell(" + x + "," + y + "," + state + ") //per commutare lo stato di una cella
 </pre>	
-
 
 <h2>Test plans</h2> 
 

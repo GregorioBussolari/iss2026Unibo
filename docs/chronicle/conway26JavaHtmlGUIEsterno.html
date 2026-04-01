@@ -23,38 +23,47 @@
 Realizzazione del  in Java del
 <a href='https://anatali.github.io/issLab2026/_static/docs/Protobook.pdf#chapter.6'>GAME OF LIFE DI CONWAY</a>, 
 cui analisi del dominio applicativo è stata svolta nello <a href= "conway26Java_v0.html">Sprint 1</a> <br>
-Nel presente <b>Sprint 3</b> la GUI deve essere realizzata attraverso una pagina HTML fornita da un Web-server.
+Nel presente <b>Sprint 3</b> la GUI deve essere realizzata attraverso una pagina HTML fornita da un Web-server, che costituisce
+un componente esterno all'applicazione.
  
 <h2>Requirements</h2>
 
  
-<!-- <div class="remark"> -->
-<pre>
-	1. dotare il gioco Life. di una pagina HTML come dispositivo di I/O
-	2. la pagina deve costituire un componente esterno alla applicazione secondo la architettura riportata in IoJavalin
-	esterno alla applicazione
-	3. il gestore del gioco sarà l'utente che ha aperto per primo (owner) una pagina HTML collegata al gioco. . In altre
-	parole, solo la pagina dell'owner avrà pulsanti di comando START/STOP/CLEAN/EXIT attivi
-	4. la pagina HTML deve essere aggiornata in modo automatico man mano il gioco procede
-	5. un utente non owner che si collega mentre il gioco è in corso, dovrebbe vedere lo stato attuale della griglia in
-	modo corretto
-	6. opzionalmente: la pagina HTML deve indicare se il gioco continua anche nel caso di griglia vuota o di config-
-	urazione tabile
-	7. il deployment del gioco deve avvenire mediante Docker.
-</pre>
+<ol>
+	<li>dotare il gioco Life. di una pagina HTML come dispositivo di I/O
+	   <li>la pagina deve costituire un componente esterno alla applicazione secondo la architettura riportata in IoJavalin
+	   esterno alla applicazione
+	   <li>il gestore del gioco sarà l'utente che ha aperto per primo (owner) una pagina HTML collegata al gioco. In altre
+	   parole, solo la pagina dell'owner avrà pulsanti di comando START/STOP/CLEAN/EXIT attivi
+	   <li>la pagina HTML deve essere aggiornata in modo automatico man mano il gioco procede
+	   <li>un utente non owner che si collega mentre il gioco è in corso, dovrebbe vedere lo stato attuale della griglia in
+	   modo corretto
+	   <li>il deployment del gioco deve avvenire mediante Docker.
+   </ol>
  
 
  
 
 <h2>Requirement analysis</h2>
 
-Considerando quanto ottenuto dall'analisi conseguita Sprint 1, si vuole fare in modo che LifeController
-sia pilotato tramite una pagina HTML. Tale pagina HTML deve essere fruita attraverso un browser 
-e pertanto veicolata attraverso un server. 
+<ul>
+	<li>Considerando quanto ottenuto dall'analisi conseguita <a href= "conway26Java_v0.html">Sprint 1</a>, si vuole fare in modo che LifeController
+	sia pilotato tramite una pagina HTML. Tale pagina HTML deve essere fruita attraverso un browser 
+	e pertanto veicolata attraverso un server. 
 
-<b>R2:</b> Questo requisito impone di estendere il sistema sw in modo tale che la GUi viene 
-erogato da un server Javalin che farà parte integrante dell'applicazione.
+	<li><b>R2:</b> Questo requisito impone di estendere il sistema sw in modo tale che la GUI venga erogata da un server Javalin,
+		come componente esterno all'applicazione, ovvero un server stand-alone, che fornisce la pagina HTML realizzando di fatto un 
+		<b>sistema distribuito</b>.
+		<img src="./img/LifeGameHTMLEsterno.png">
+		<br>
+		Il componente che utilizza il server viene indicato col nome IoJavalin<br>
+		IOJavalin è parte di un componente, ovvero un servizio, esterno all'applicazione che deve relazionarsi con LifeController.
+		Pertanto applicazione e Server Javalin devono poter comunicare scambiandosi messagg, nello svolgimento dei rispettivi servizi.
 
+	<li> L'interazione applicazione-servizio avvenire:
+		Utilizzando una connessione Websocket sulla porta 8080, ovvero la stessa aperta dal servizio che eroga la pagina, come specificato dal committente.
+		Tuttavia in linea di principio potrebbe avvenire anche con altri protocolli
+</ul>
 <h2>Problem analysis</h2>
 <img src="./img/LifeGameHtml.png">
 
