@@ -55,15 +55,8 @@ Nel presente <b>Sprint 3</b> la GUI deve essere realizzata attraverso una pagina
 	<br>
 	Il componente che utilizza il server viene indicato come IOJavalin
 
-	<li>IoJavalin è parte di un oggetto OutInWs che implementa i metodi dell'interfaccia <a href= "https://github.com/GregorioBussolari/iss2026Unibo/blob/main/ConwayLife/Sprint1/conway26Java/src/main/java/conway/domain/IOutDev.java">IOutDev</a> e 
-		inoltre definisce un metodo per iniettare il riferimento a LifeController, con cui avviene la comunicazione:
-		
-		<!-- <div class="remark"> -->
-		<pre>
-			public void setController(GameController controller) {
-				this.controller = controller;
-			}
-		</pre>	
+	<li>IoJavalin è parte di un oggetto OutInWs che implementa i metodi dell'interfaccia <a href= "https://github.com/GregorioBussolari/iss2026Unibo/blob/main/ConwayLife/Sprint1/conway26Java/src/main/java/conway/domain/IOutDev.java">IOutDev</a>. 
+	
 	<br>Pertanto, la classe OutInWs deve implementare <a href= "https://github.com/GregorioBussolari/iss2026Unibo/blob/main/ConwayLife/Sprint1/conway26Java/src/main/java/conway/domain/IOutDev.java">IOutDev</a>, definita in fase di analisi nello sprint 1
 	permettendo ad IOJavalin di abilitare la comunicazione con LifeController e di attivare i metodi di LifeController quando riceve (via WS) comandi dalla pagina.
 
@@ -74,19 +67,66 @@ Nel presente <b>Sprint 3</b> la GUI deve essere realizzata attraverso una pagina
 	2. Non avvia la pagina in automatico ma accedendo ad un browser locale con localhost:8080, si ottiene la pagina.
 	</ul>
 <h2>Problem analysis</h2>
-La comunicazione con il browser invece è bidirezionale e deve rimanere aperta per tutto il tempo necessario.
-Pertanto va aperta una connessione webSocket con il browser. I messaggi inviati sulla WebSocket con il browser
-sono semplici stringhe, che formalizzo come segue:
-<br>
-Dispatch message Browser - Server
-<pre>
-	msg( eval, dispatch, SENDER, lifectrl, CMD, 0 )
-	CMD = "start", 
-		"stop", 
-		"exit", 
-		"clear",
-		cell(" + x + "," + y + "," + state + ") //per commutare lo stato di una cella
-</pre>	
+IoJavalin è parte di un oggetto OutInWs che implementa i metodi dell'interfaccia <a href= "https://github.com/GregorioBussolari/iss2026Unibo/blob/main/ConwayLife/Sprint1/conway26Java/src/main/java/conway/domain/IOutDev.java">IOutDev</a> e 
+inoltre definisce un metodo per iniettare il riferimento a LifeController, permettendo la comunicazione con esso:
+	
+	<!-- <div class="remark"> -->
+	<pre>
+		public void setController(GameController controller) {
+			this.controller = controller;
+		}
+	</pre>	
+<br><br>
+<ul>
+	<li>Analisi della comunicazione <b>pagina-server</b> <br>
+	La pagina comunica con il guiserver usando stringhe strutturate, in modo che guiserver possa ricavare dalla stringa,
+	oggetti coerenti con l'interfaccia IApplMessage:
+	<br>
+	<pre>
+		msg( MSGID, dispatch, SENDER, guiserver, CONTENT, SEQNUM )
+	</pre>
+	Ciò viene fatto in particolare per rendere il livello applicativo tecchnology-independent.<br>
+	I messaggi inviati di tipo dispatch, ovvero fire and forget, in quanto non richiedono una risposta, ma 
+	vogliono solo creare un'azione lato server. <br>
+
+	Inizialmente la pagina ha come nome "unknown", che verrà usato come nome del sender alla prima connessione
+	<pre>
+		msg( MSGID, dispatch, unknown, guiserver, CONTENT, SEQNUM )
+	</pre>
+
+	Il Server risponde alla richiesta di connessione di una nuova pagina, creando ed assegnando alla pagina 
+	un nuovo nome (pagename). Inoltre per far fede al Requisito R3, è necessario memorizzare la prima connessione
+	che prende il ruolo di owner.
+
+	<pre>
+		msg( MSGID, dispatch, pagename, guiserver, CONTENT, SEQNUM )
+	</pre>
+
+	Dopo la connessione possono essere inviati dei comandi dalla pagina al server, formalizzati come dispatch, sempre in ossequio al requisito R3,
+	solo il coller1 deve potre inviare i comandi. Il content varia a seconda del tipo di comando:
+	<pre>
+		msg( do, dispatch, caller1, guiserver, CONTENT, SEQNUM )
+	</pre>
+	CONTENT potrà essere una semplice String quale start/stop/clear/canvasready<br>
+	
+	Quando una pagina invia dispatch al guiserver dovrà inviare a sua volta un messaggio di comando a lifectrl.
+	Per semplificare il codice, i messaggi inviati dalla pagina al server possono avere come destinatorio
+	direttamente il nome lifeCtrl.
+
+	<pre>
+		msg( do, dispatch, caller1, lifeCtrl, start, SEQNUM )
+	</pre>
+
+	<li>Analisi della comunicazione <b>Server-Pagina</b><br>
+	Nella comunicazione tra il Server e la Pagina, i messaggi non sono Strutturati, come prima, per evitare di obbligare la pagina a 
+	comunicare con messaggi strutturati in questo modo. Pertano il server invia alla pagina comandi espressi da semplici stringhe
+	<pre>
+		ID:name //par dare il valore name al nome della pagina
+		cell(X,Y) //per commutare lo stato di una cella (griglia granulare)
+		[[false,false, ... ]] //per specificare lo stato di una griglia globale
+	</pre>
+	Messaggi siffatti possno essere interpretati e gestiti direttamente in JavaScript dalla pagina
+</ul>
 
 <h2>Test plans</h2> 
 

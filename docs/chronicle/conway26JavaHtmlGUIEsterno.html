@@ -20,15 +20,16 @@
 <div class="body">  
 
 <h2>Introduction</h2>
-Realizzazione del  in Java del
-<a href='https://anatali.github.io/issLab2026/_static/docs/Protobook.pdf#chapter.6'>GAME OF LIFE DI CONWAY</a>, 
-cui analisi del dominio applicativo è stata svolta nello <a href= "conway26Java_v0.html">Sprint 1</a> <br>
-Nel presente <b>Sprint 3</b> la GUI deve essere realizzata attraverso una pagina HTML fornita da un Web-server, che costituisce
-un componente esterno all'applicazione.
- 
+<div id = "content">
+	Realizzazione del  in Java del
+	<a href='https://anatali.github.io/issLab2026/_static/docs/Protobook.pdf#chapter.6'>GAME OF LIFE DI CONWAY</a>, 
+	cui analisi del dominio applicativo è stata svolta nello <a href= "conway26Java_v0.html">Sprint 1</a> <br>
+	Nel presente <b>Sprint 3</b> la GUI deve essere realizzata attraverso una pagina HTML fornita da un Web-server, che costituisce
+	un componente esterno all'applicazione.
+</div>
 <h2>Requirements</h2>
 
- 
+<div id = "content">
 <ol>
 	<li>dotare il gioco Life. di una pagina HTML come dispositivo di I/O
 	   <li>la pagina deve costituire un componente esterno alla applicazione secondo la architettura riportata in IoJavalin
@@ -43,9 +44,9 @@ un componente esterno all'applicazione.
  
 
  
-
+   <div>
 <h2>Requirement analysis</h2>
-
+<div id = "content">
 <ul>
 	<li>Considerando quanto ottenuto dall'analisi conseguita <a href= "conway26Java_v0.html">Sprint 1</a>, si vuole fare in modo che LifeController
 	sia pilotato tramite una pagina HTML. Tale pagina HTML deve essere fruita attraverso un browser 
@@ -64,9 +65,94 @@ un componente esterno all'applicazione.
 		Utilizzando una connessione Websocket sulla porta 8080, ovvero la stessa aperta dal servizio che eroga la pagina, come specificato dal committente.
 		Tuttavia in linea di principio potrebbe avvenire anche con altri protocolli
 </ul>
+</div>
 <h2>Problem analysis</h2>
-<img src="./img/LifeGameHtml.png">
+<div id = "content">
+In quanto sistema distribuito, sono presenti due parti che devono interagire in modo opportuno scambiandosi messaggi: 
+<ul>
+	<li>L'applicazione (conseguita nello <a href= "conway26Java_v0.html">Sprint 1</a>), che chiamiamo lifectrl.
+	<li>Il server che eroga la pagina HTML, che chiamiamo guiserver
+</ul>
+Lifectrl si deve manifestare al guiserver aprendo una connessione via webseocket sulla porta 8080.
+La comunicazione tra browser e il server è bidirezionale e deve rimanere aperta per tutto il tempo necessario.<br>
 
+<img src="./img/LifeGameHtml.png">
+<ul>
+	<br><br>
+	<li>Analisi della comunicazione <b>pagina-server</b> <br>
+	La pagina comunica con il guiserver usando stringhe strutturate, in modo che guiserver possa ricavare dalla stringa,
+	oggetti coerenti con l'interfaccia IApplMessage:
+	<br>
+	<pre>
+		msg( MSGID, dispatch, SENDER, guiserver, CONTENT, SEQNUM )
+	</pre>
+	Ciò viene fatto in particolare per rendere il livello applicativo tecchnology-independent.<br>
+	I messaggi inviati di tipo dispatch, ovvero fire and forget, in quanto non richiedono una risposta, ma 
+	vogliono solo creare un'azione lato server. <br>
+
+	Inizialmente la pagina ha come nome "unknown", che verrà usato come nome del sender alla prima connessione
+	<pre>
+		msg( MSGID, dispatch, unknown, guiserver, CONTENT, SEQNUM )
+	</pre>
+
+	Il Server risponde alla richiesta di connessione di una nuova pagina, creando ed assegnando alla pagina 
+	un nuovo nome (pagename). Inoltre per far fede al Requisito R3, è necessario memorizzare la prima connessione
+	che prende il ruolo di owner.
+
+	<pre>
+		msg( MSGID, dispatch, pagename, guiserver, CONTENT, SEQNUM )
+	</pre>
+
+	Dopo la connessione possono essere inviati dei comandi dalla pagina al server, formalizzati come dispatch, sempre in ossequio al requisito R3,
+	solo il coller1 deve potre inviare i comandi. Il content varia a seconda del tipo di comando:
+	<pre>
+		msg( do, dispatch, caller1, guiserver, CONTENT, SEQNUM )
+	</pre>
+	CONTENT potrà essere una semplice String quale start/stop/clear/canvasready<br>
+	
+	Quando una pagina invia dispatch al guiserver dovrà inviare a sua volta un messaggio di comando a lifectrl.
+	Per semplificare il codice, i messaggi inviati dalla pagina al server possono avere come destinatorio
+	direttamente il nome lifeCtrl.
+
+	<pre>
+		msg( do, dispatch, caller1, lifeCtrl, start, SEQNUM )
+	</pre>
+	<br><br>
+	<li>Analisi della comunicazione <b>Server-Pagina</b><br>
+	Nella comunicazione tra il Server e la Pagina, i messaggi non sono Strutturati, come prima, per evitare di obbligare la pagina a 
+	comunicare con messaggi strutturati in questo modo. Pertano il server invia alla pagina comandi espressi da semplici stringhe
+	<pre>
+		ID:name //par dare il valore name al nome della pagina
+		cell(X,Y) //per commutare lo stato di una cella (griglia granulare)
+		[[false,false, ... ]] //per specificare lo stato di una griglia globale
+	</pre>
+	Messaggi siffatti possno essere interpretati e gestiti direttamente in JavaScript dalla pagina
+	<br><br>
+	<li>Analisi delle comunicazioni <b>guiserver-applicazione</b><br>
+		Tutta la logica di interazione tra l'applicazione e il guiserver deve essere gestita dalla
+		classe <a href= "https://github.com/GregorioBussolari/iss2026Unibo/blob/main/ConwayLife/Sprint3/conway26GuiHtml/src/main/java/conway26appl/OutInGuiInteraction.java">OutInGuiInteraction</a>, che implementa IOutDev
+		nel componente applicativo. Ereditando dallo sprint 2, il sistema applicativo si configura nel seguente modo:
+		<pre>
+			LifeInterface life = new Life( 20,20 );
+			IOutDev iodevgui = new OutInGuiInteraction( ); //dispositivo di I/O
+			GameController cc = new LifeControllerAdhoc(life, iodevgui) ;
+			((OutInGuiInteraction) iodevgui).setController(cc); //iniezione del controller
+		</pre>
+
+			OutInGuiInteraction implementa la classe IObserver per gestire comunicazioni bidirezionali asincrone. Tutti i messaggi 
+			(ri)trasemssi dal guiserver verranno percepiti e gestiti atraverso i metodi update.
+			Il controller lifeCtrl viene pertanto opportunamente invocato dal metodo update, gestendo i 
+			comandi in arrivo e inviando a sua volta messaggi di comando al guiserver. <br>
+			Questi messaggi sono formalizzabili come dispatch che indicano al guiserver di modificare la visualizzazione
+			della griglia.
+			<pre>
+				CommUtils.buildDispatch("lifectrl", "eval", msg, "guiserver" );
+			</pre>
+</ul>
+
+<br>
+
+</div>
 <h2>Test plans</h2> 
 
 <h2>Project</h2> 
@@ -75,7 +161,6 @@ un componente esterno all'applicazione.
  
 
 <h2>Deployment</h2> 
-Deployed mediante Docker.
  
 <h2>Maintenance</h2> 
  
