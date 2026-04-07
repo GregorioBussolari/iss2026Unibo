@@ -154,8 +154,96 @@ La comunicazione tra browser e il server è bidirezionale e deve rimanere aperta
 
 </div>
 <h2>Test plans</h2> 
+Al fine di testare la corretta interazione tra i componenti, si possono realizzare caller specifici.<br>
+Si ipotizza pertanto l'esecuzione di un caller che implementa IObserver, cui routine è quella di aprire una connessione websocket alla porta 8080,
+ed inviare il messaggio di comando al guiserver, simulando l'interazione guiserver-applicazione. In particolare si simula un comando di dispatch inviato da lifeCtrl a guiserver per
+modificare lo stato della cella (5,7), indicando di modificare la visualizzazione della griglia, come farebbe il controller man mano che il gioco procede.
+Ci aspettiamo pertanto che il guiserver ricevuto il messaggio, proceda a fare il forward a tutti i caller attualemnte attivi come pagine HTML, il messaggio per produrre l'aggiornamento corretto, modificando la cella cell(5,7).
 
+<pre>
+	public class CallerServerInteraction  implements IObserver{  
+		private String name;
+	   
+	   protected void sendCellChange( ) throws Exception {
+		   Interaction wsconn = WsConnection.create("localhost:8080", "eval", this);
+		   //((Connection) wsconn).setTrace(true);
+		   //build the dispatch message, switch cell 5, 7
+			IApplMessage cmdmsg = CommUtils.buildDispatch("lifeCtrl", "eval", "cell(5,7)", "guiserver"  );
+			CommUtils.outblue(name + " sending " + cmdmsg);
+			wsconn.forward(cmdmsg);
+			
+			CommUtils.delay(2000);
+			CommUtils.outblue("CallerServerInteraction | BYE "  );
+   		}
+	}     
+</pre>
 <h2>Project</h2> 
+
+<ol>
+	<li> <b>Comunicazione server - pagina</b>: <br>
+		Aprire la connessione webseocket per comunicare con guiserver, la pagina viene erogata dal server:
+		<pre>
+			//se il server è nella stessa macchina, usa localhost:8080
+			socketToGui = new WebSocket("ws://localhost:8080/eval");
+			socketToGui = new WebSocket("ws://"+window.location.host+"/eval");
+		</pre>
+
+		Come si diceva in analisi il server invia alla pagina comandi espressi da semplici stringhe, che verranno interpretate dal codice JavaScript scritto nella pagina.<br>
+		Si specifica alla ricezione di un messaggio, 2 casi principali di dispatching:
+		<ul>
+			<li> Handshake di identità: La pagina estrae e memorizza il proprio identificatore in pageId, 
+				che verrà usato come SENDER in tutti i messaggi successivi verso il server.
+				<pre>
+					if (event.data.startsWith("ID:")) {
+						pageId = event.data.split(":")[1];
+					}
+				</pre>
+			<li> Ricezione della griglia completa: può essere impostata come griglia globale o come griglia granulare<br>
+				La griglia pertanto può essere impostata:
+			<ol>
+				<li> Come griglia globale attraverso l'uso di canvas:<br>
+					Il server invia la griglia serializzata come array JSON bidimensionale. 
+					Viene deserializzata e passata a draw(), schedulata al prossimo frame del browser tramite requestAnimationFrame.
+					<pre>
+						//messaggi del tipo [[false,false, ... ]]
+						if( event.data.includes("[[")) {
+							const grid = JSON.parse(event.data);
+							requestAnimationFrame(() => draw(grid));
+						}
+					</pre>
+					Draw(grid) fa rendering su canvas:
+					<pre>
+						ctx.clearRect(0, 0, canvas.width, canvas.height);  // 1. pulisce tutto
+						const currentRows = grid.length;                    // 2. dimensioni dinamiche
+						const currentCols = grid[0].length;
+
+						for (let r = 0; r < currentRows; r++) {
+							for (let c = 0; c < currentCols; c++) {
+								ctx.fillStyle = grid[r][c] ? "#ff0000" : "#00ff00";  // 3. stato vivo/morto
+								ctx.fillRect(c * CELL_SIZE, r * CELL_SIZE, CELL_SIZE - 1, CELL_SIZE - 1);
+							}
+						}
+					</pre>
+
+					<li> Come griglia granulare ovvero serie di celle quadrate, ciascuna con ID cell-i-j incapsulata in
+						un tag. Pertanto in questo caso: 
+					<pre>
+						if (event.data.startsWith("cell(")) {
+							coords = event.data.replace("cell(", "").replace(")", "").split(",");
+							updateCellColor(coords[0], coords[1], coords[2]);
+						}
+
+					</pre>
+					Ogni cella ha un indirizzo fisico nel documento HTML che è l'ID e lo stato vivomorto è appreso direttamente dall'elemento tramite una classe CSS:
+					<pre>
+						//nel metodo function updateCellColor(newX, newY,color)
+						cellxy = document.getElementById(`cell(${newX},${newY})`);
+					</pre>
+				</ol>
+		</ul> 
+		
+				
+</ol>
 
 <h2>Testing</h2> 
  

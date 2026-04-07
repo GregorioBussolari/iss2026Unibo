@@ -86,7 +86,8 @@ div.top {
 			border: 1.5px solid silver;
 			margin-left: 50px;
 			margin-right: 50px;
-			padding-top: 10px
+			padding-top: 10px;
+			width: 70%;
 		}
 
 		div.body {
