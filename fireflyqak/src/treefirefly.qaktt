@@ -1,0 +1,41 @@
+System fireflyqak
+
+Context ctxfirefly ip[host="localhost" port=8010]
+
+QActor creator context ctxfirefly{
+	State s0 initial{ 
+   	 	[#  
+		 clearlog("./logs/qakdemo26.log") 	//vedi src/main/resources/logback.xml
+		 var num_flies = 100
+	 	#]
+		delay 500 
+		[# logger.info(  "${currentState.stateName} cretes fireflys"  ) #]
+		create firefly _"1" 
+		create firefly _"2"
+		create firefly _"3"
+		println("$name all the fireflies were created") color magenta
+		delay 10000 //Avoid premature exit
+		[# System.exit(0) #]
+	}
+}
+	
+QActor firefly context ctxfirefly dynamicOnly {
+	[#  
+		var num		= 0
+	  	val DT = (200L..2000L).random()
+ 	#]
+	State s0 initial{
+		println("$name | Hi I'm alive, I blink every $DT ms") color green
+	}
+	Transition t0
+		whenTimeVar  DT -> handleBlink
+	
+	State handleBlink{
+		[# num ++ #]
+		println("$name | $num light on") color yellow
+		delay 500
+		println("$name | $num light off") color black
+		
+	}Transition t0
+		whenTimeVar  DT -> handleBlink	 
+}  

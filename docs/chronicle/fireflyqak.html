@@ -1,0 +1,138 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+
+<link rel="stylesheet" type="text/css" href="css/mystyle.css">
+<!--
+    <script type="text/javascript" src="../css/issStyle.js"></script>
+-->
+    
+</head>
+
+<title>Firefly QAK</title>
+
+<body>
+
+    <div id="top">
+        <h1>Firefly QAK</h1>
+    </div> <div class="body">  
+
+        <h2>Introduction</h2>
+        <div id = "content">
+        Realizzazione in 
+        <a href='https://anatali.github.io/issLab2026/_static/docs/Protobook.pdf#chapter.17'>linguaggio 
+            QAK</a> di un sistema firefly che simula il comportamento delle lucciole.
+        </div>
+        <h2>Requirements</h2>
+        <div id = "content">
+            <ol>
+                <li> Definire un sistema firefly che simula il comportamento di una lucciola
+                <li> Il sistema deve poter simulare un numero N di luccile (con N al più 100).
+                <li> Ogni lucciola deve simulare ad intervalli di tempo regolari la propria bioluminescenza.
+                <li> Ciascuna lucciola ha un proprio tempo di pulsazione in cui emette luce, per poi spegnersi dopo un arco tempo costante (es 500ms).
+            </ol>
+            
+        </div>
+        <h2>Requirement analysis</h2>
+        <ul>
+            <li>Da R1: Per poter definire il comportamento di una lucciola, ne viene definito il modello in linguaggio QAK.
+                La singola lucciola infatti viene realizzata attraverso un QActor, ossia come un automa di Moore, cui transazioni di stato 
+                definiscono il comportamento stesso della singolo individuo.
+                <br> Dopo uno stato iniziale, la lucciola deve emettere ad intervalli di tempo regolari bioluminescenza, per poi spegnersi. La lucciola
+                dovrà reagire a eventi di tipo temporale, per sapere esattamente quando emettere luce.
+            <pre>
+                QActor firefly context ctxfirefly{
+                    [#  
+                        var num		= 0
+                          val DT = (200L..2000L).random()
+                     #]
+
+                     //initial state of every firefly
+                    State s0 initial{
+                        println("$name | Hi I'm alive, I blink every $DT ms") color green
+                    }
+                    Transition t0
+                        whenTimeVar  DT -> handleBlink  //event every delta time (200ms-2000ms)
+                    
+                    State handleBlink{
+                        [# num ++ #]
+                        println("$name | $num light on") color yellow
+                        delay 500
+                        println("$name | $num light off") color black
+                    }Transition t0
+                        whenTimeVar  DT -> handleBlink	
+                }
+            </pre> 
+            Dai requisiti si evince che  attualmente la singola lucciola può essere anche realizzata senza dover interagire attraverso
+            messaggi con le altre in quanto il comportamento della singola è completamente autonomo e non interagisce con le altre durante il tempo di vita.
+            <li>Da R2-R4: Ogni lucciola deve avare un comportamento autonomo rispetto alle altre, con un proprio tempo di pulsazione in cui emette luce.
+                Questo comportamento si può ottenere definendo un QActor per ogni lucciola in modo tale che le coroutine non vengano interrotte da altri actor.
+                Ciascuna pertanto definisce un proprio perido ed emette periodicamente luce. Questo suggerisce il problema di creare dinamicamente le lucciole in base il numero desiderato. <br>
+
+        </ul>
+        <div id = "content">
+        </div>
+        <h2>Problem analysis</h2>
+        <div id = "content">
+            Il problema principale riguarda la creazione di N = 100 QActor indipendenti, ognuno descritto dal modello presentato in fase di analisi, in modo da poter emettere periodicamente luce in modo svincolato dagli altri individui.<br>
+            Per questo motivo è stato scelto di usare un'architettura basata su un QActor creator, che ha il compito di creare tutte le lucciole. Per fare ciò è stato necessario avvalersi della creazione di attori a runtime, definenone solo il template con la keyword <b>dynamicOnly</b><div class=""></div>
+            Creator ha un ruolo puramente iniziale, nel creare N firefly attraverso l'istruzione:
+            <pre>
+                create firefly _"$num"
+            </pre>
+
+            Tuttavia poichè il numero di lucciole da creare potrebbe non essere noto a priori e per implementare la nozione di ciclo iterativo di creazione delle lucciole, ci si avvale di un helper, che ha il compito di rispondere al messaggio del tipo:
+            <pre>
+                msg: msg(start,dispatch,creator,helper,start(10),8)
+            </pre>
+            dove start(10) è il contenuto di un messaggio di dispatch inviato dal creatore, per avviare il protocollo di creazione, specificando il numero di lucciole da costruire.
+            
+            <br>
+            L'helper potrebbe essere  impostato come attore in kotlin che reagisce al messaggio di start definito in precedenza. La reazione consiste proprio nell'implementazione di un ciclo di dispatch da inviare al creator, che corrispondono ognuna alla creazione di una luccuola. 
+            <br>L'Helper potrebbe essere dichiarato come segue:
+            <pre>
+                CodedQActor helper context ctxfirefly className "fireflyqak.helper"
+            </pre>
+
+            I Messaggi del tipo inviati dall'helper al creator sono:
+            <pre>
+                msg(build,dispatch,helper,creator,build(1),9)
+            </pre> 
+            Dove build è il nome del messaggio e 1 è il numero identificatore specifico che definisce il nome dell'attore/lucciola ($num).
+            L'helepr ha il solo compito ciclico di inviare N messaggi dispatch al creator, che provvederà a produrre le lucciole necessarie.
+            <br>
+            Una volta ricevuto il messaggio di build il creator ha il solo compito di estrarre dal messaggio il numero id. della firefly da creare ed 
+            usare la create definita prima per avviare il QActor corrispondente.
+        </div>
+        <h2>Test plans</h2> 
+        
+        <h2>Project</h2> 
+        
+        <h2>Testing</h2> 
+         
+        
+        <h2>Deployment</h2> 
+         
+        <h2>Maintenance</h2> 
+         
+        <!-- USEFUL
+        <table style="width:100%" border="1">
+        <tr>
+        <td style="width:50%">
+        </td>
+        <td></td>
+        </tr>
+        </table>
+        -->
+                      
+        <br/><br/> 	
+        </div>  
+        
+        <div style="background-color:rgba(86, 56, 253, 0.9); width:80%;text-align:left;color:white;">
+        By studentName email: gregorio.bussolari@studio.unibo.it, 
+        <!-- <img src="./img/mbot-S.jpg" alt="mbot" width="15%" height="15%"> -->
+        <img src="./img/me.JPG" alt="greg" width="10%" height="10%">
+        GIT repo: <a href="https://github.com/GregorioBussolari/iss2026Unibo.git">https://github.com/GregorioBussolari/iss2026Unibo.git <div>
+        </div> 
+    </body>
+</html>

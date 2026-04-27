@@ -1,0 +1,24 @@
+//System fireflyqak
+//
+//Context ctxfirefly ip[host="localhost" port=8010]
+//
+//QActor fireflymanager context ctxfirefly{
+//	[#  
+//		var flys_num		= 10
+//	  	val DT = (200L..2000L).random()
+// 	#]
+//	State s0 initial{
+//		println("$name | starting all the firefly") color blue
+//	}
+//	Transition t0
+//		whenTimeVar  DT -> handleBlink
+//	
+//	State handleBlink{
+//		[# num ++ #]
+//		println("$name | $num light on") color yellow
+//		delay 500
+//		println("$name | $num light off") color black
+//		
+//	}Transition t0
+//		whenTimeVar  DT -> handleBlink	
+//}

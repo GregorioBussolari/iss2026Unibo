@@ -74,7 +74,9 @@ public class IoJavalin {
         	 * rendendo il codice universale
          	 */
         	//var inputStream = getClass().getResourceAsStream("/page/ConwayInOutPage.html");  
-        	var inputStream = getClass().getResourceAsStream("/page/LifeIInOutCanvas.html");     
+        	var inputStream = (firstCaller == null)
+        		    ? getClass().getResourceAsStream("/page/LifeIInOutCanvas.html")
+        		    : getClass().getResourceAsStream("/page/LifeIInOutNoButton.html");   
         	if (inputStream != null) {
         		// Trasformiamo l'inputStream in stringa (o lo mandiamo come stream)
         	    String content = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);

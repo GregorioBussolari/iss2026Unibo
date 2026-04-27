@@ -1,0 +1,41 @@
+System qakdemo26
+
+Dispatch msg1 : msg1(ARG)
+
+Context ctxqakdemo26 ip [host="localhost" port=8010]
+
+QActor sender context ctxqakdemo26{
+	State s0 initial{
+		[# logger.info(  "${currentState.stateName} handling $currentMsg"  ) #]
+		println(" $name sends msg1: msg1(ciao) ") color green
+		[# logger.info(  "${currentState.stateName} sending msg1:msge1(1)"  ) #]
+		delay 300
+		forward receiver -m msg1 : msg1(ciao)
+	}
+}
+
+QActor receiver context ctxqakdemo26{
+	[#  
+		   clearlog("./logs/qakdemo26.log") 	//vedi src/main/resources/logback.xml
+	#]
+	State s0 initial { 	    
+		[# logger.info(  "${currentState.stateName} handling $currentMsg"  ) #]
+		discardMsg Off  //Off is default: memorizzo i messaggi non attesi 			  
+ 	}      
+ 	Goto waitForDispatch
+ 	
+ 	State waitForDispatch{
+ 		printCurrentMessage color blue
+ 		[# logger.info(  "${currentState.stateName} handling $currentMsg"  ) #]
+ 	}
+ 	Transition t0 
+ 		whenMsg msg1 -> s2
+ 		
+ 	State s2{
+ 		printCurrentMessage color blue
+ 		[# logger.info(  "${currentState.stateName} handling $currentMsg"  ) #]
+ 		onMsg( msg1:msg1(ARG) ){ //tenta l'unificazione tra ARG e il payload
+ 			println("$name in s2 | msg1:msg1(${payloadArg(0)})") color blue
+ 		}
+ 	}
+}

@@ -1,0 +1,92 @@
+System sistemasqak
+
+/*
+ * sistemas: un servizio che valuta il valore di una funzione
+*/
+
+Dispatch eval : arg(V)
+Request evalr: argr(V)
+Reply evalreply: value(V) for evalr
+
+Context ctxsistemas ip [ host= "localhost" port= 8010 ]
+
+
+
+QActor sistemas context ctxsistemas {
+	[# 
+		fun  eval(x: Double): String {
+			val R = 3*x
+			return ""+R
+		}
+	#]
+	State s0 initial{
+		println("Hello world") color blue
+		[# val V = eval(2.0) #]
+		println("result = $V") color blue
+		println("now i'm waiting for a dispatch")
+	}
+	Transition t0 
+		whenMsg eval -> handleEval
+		whenRequest evalr -> handleRequest
+		
+	State handleEval{
+		printCurrentMessage color blue
+		onMsg(eval: arg(X)){
+			[# 
+				val arg = payloadArg(0)
+				val V = arg.toDouble()
+			#]
+			println("$name : evaluate: $V") color cyan
+			[# val Value = eval(V) #]
+			println("$name : value estimated = $Value") color green
+		}
+	}
+	Transition t0 
+		whenMsg eval -> handleEval
+		whenRequest evalr -> handleRequest
+	
+	State handleRequest{
+		printCurrentMessage color blue
+		[# var Res = "" #]
+		onMsg(evalr: argr(X)){
+			[# 
+				val arg = payloadArg(0)
+				val V = arg.toDouble()
+			#]
+			println("$name : evaluate: $V") color cyan
+			[# Res = eval(V) #]
+			println("$name : value estimated = $Res") color green
+		}
+		replyTo evalr with evalreply : value($Res)
+		println("$name : handleRequest ends") color blue
+	}
+	Transition t0 
+		whenMsg eval -> handleEval
+		whenRequest evalr -> handleRequest
+}
+
+/*
+ * Versione sistemas come programma
+ */
+ 
+QActor callermock context ctxsistemas{
+	State s0 initial{
+		[# val V = 2.0 #]
+		forward sistemas -m eval : arg($V)
+		request sistemas -m evalr: argr($V)
+	}
+	Transition t0 
+		whenReply evalreply -> handleReply
+		
+	State handleReply{
+		printCurrentMessage color magenta
+		onMsg(evalreply : value(X)){
+			[# var varString = payloadArg(0) #]
+			println("$name : result received=$varString") color magenta
+		}
+	}
+}
+
+
+
+
