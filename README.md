@@ -17,7 +17,6 @@
  ### Sistemi come servizi
  * [Sistema S Javalin](FunctionEvalService/SistemaSJavalin): Funzione eval come Servizio Javalin
  ### Sistema ConwayLife con pagine HTML
-.
  * [ConwayLife Sprint3.0 - Interno](conway26GuiHtml): <b>evoluzione</b> del primo prototipo
    con un dispositivo di output come una paginaWeb (HTML/JS). Realizzazione di Javalin come <b>componente interno</b> alla applicazione. Gioco come <b>servizio</b> distribuibile mediante Docker.
  * [ConwayLife Sprint3.1 - Esterno](ConwayLife/Sprint3/conway26GuiHtml): <b>evoluzione</b> del primo prototipo
