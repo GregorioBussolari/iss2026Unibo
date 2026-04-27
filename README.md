@@ -24,5 +24,5 @@
  * [ConwayLife Sprint3(ConwayLife/Sprint3/conway26Java): evoluzione del sistema in locale
    usando una pagina HTML come dispositivo di I/O. <i>Distribuzione</i>: Docker yaml.
 
- ### Sistema di simulazione firefly
- * [Firefly simulator](fireflyqak/fireflysimulator.qak): ealizzazione in linguaggio QAK di un sistema firefly che simula il comportamento delle lucciole.
+ ### Sistema di simulazione Firefly
+ * [Firefly simulator](fireflyqak/src): realizzazione in linguaggio QAK di un sistema firefly che simula il comportamento delle lucciole.
