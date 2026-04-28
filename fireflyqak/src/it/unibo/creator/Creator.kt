@@ -35,7 +35,7 @@ class Creator ( name: String, scope: CoroutineScope, isconfined: Boolean=false, 
 						  
 								 clearlog("./logs/qakdemo26.log") 	//vedi src/main/resources/logback.xml
 						CommUtils.outcyan("$name : trying to create fireflies")
-						forward("start", "start(100)" ,"helper" ) 
+						forward("start", "start(400)" ,"helper" ) 
 						 logger.info(  "${currentState.stateName} Create actors 100 fireflys"  )  
 						//genTimer( actor, state )
 					}

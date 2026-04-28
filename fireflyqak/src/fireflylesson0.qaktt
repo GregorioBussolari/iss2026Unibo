@@ -1,0 +1,16 @@
+System fireflyqak
+
+Context ctxfirefly ip [ host="localhost" port=8040 ]
+
+QActor firefly1 context ctxfirefly  {
+ 	[#   
+	   var  X          = 1
+	   var  Y          = 1
+	    
+ 	#] 
+ 	
+ 	State s0 initial{
+ 		printCurrentMessage color magenta
+ 		
+ 	}
+ }

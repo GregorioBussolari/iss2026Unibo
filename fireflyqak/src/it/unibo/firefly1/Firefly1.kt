@@ -29,36 +29,20 @@ class Firefly1 ( name: String, scope: CoroutineScope, isconfined: Boolean=false,
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
 		//val interruptedStateTransitions = mutableListOf<Transition>()
 		//IF actor.withobj !== null val actor.withobj.name� = actor.withobj.method�ENDIF
-		  
-				var num		= 0
-			  	val DT = (200L..2000L).random()
+		   
+			   var  X          = 1
+			   var  Y          = 1
+			    
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
-						CommUtils.outgreen("$name | Hi I'm alive, I blink every $DT ms")
+						CommUtils.outmagenta("$name in ${currentState.stateName} | $currentMsg | ${Thread.currentThread().getName()} n=${Thread.activeCount()}")
+						 	   
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
 					sysaction { //it:State
-				 	 		stateTimer = TimerActor("timer_s0", 
-				 	 					  scope, context!!, "local_tout_"+name+"_s0", DT )  //OCT2023
 					}	 	 
-					 transition(edgeName="t00",targetState="handleBlink",cond=whenTimeout("local_tout_"+name+"_s0"))   
-				}	 
-				state("handleBlink") { //this:State
-					action { //it:State
-						 num ++  
-						CommUtils.outyellow("$name | $num light on")
-						delay(500) 
-						CommUtils.outblack("$name | $num light off")
-						//genTimer( actor, state )
-					}
-					//After Lenzi Aug2002
-					sysaction { //it:State
-				 	 		stateTimer = TimerActor("timer_handleBlink", 
-				 	 					  scope, context!!, "local_tout_"+name+"_handleBlink", DT )  //OCT2023
-					}	 	 
-					 transition(edgeName="t01",targetState="handleBlink",cond=whenTimeout("local_tout_"+name+"_handleBlink"))   
 				}	 
 			}
 		}

@@ -29,5 +29,8 @@ with Diagram('fireflyqakArch', show=False, outformat='png', graph_attr=graphattr
           creator=Custom('creator','./qakicons/symActorWithobjSmall.png')
           firefly=Custom('firefly','./qakicons/symActorDynamicWithobj.png')
           helper=Custom('helper(coded)','./qakicons/codedQActor.png')
+     with Cluster('ctxgrid', graph_attr=nodeattr):
+          griddisplay=Custom('griddisplay(ext)','./qakicons/externalQActor.png')
+     firefly >> Edge(color='blue', style='solid',  decorate='true', label='<cellstate &nbsp; >',  fontcolor='blue') >> griddisplay
      creator >> Edge(color='blue', style='solid',  decorate='true', label='<start &nbsp; >',  fontcolor='blue') >> helper
 diag

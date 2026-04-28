@@ -2,19 +2,20 @@ System fireflyqak
 
 Dispatch build : build( X )
 Dispatch start : arg( NUM )
+Dispatch cellstate : cellstate(X,Y,COLOR)     "set color of cell X,Y"
 
-Context ctxfirefly ip[host="localhost" port=8010]
-
+Context ctxfirefly ip[host="localhost" port=8040]
+Context ctxgrid ip [host="127.0.0.1" port=8050 ]
 
 CodedQActor helper context ctxfirefly className "fireflyqak.helper"
 
-QActor creator context ctxfirefly{
+QActor creator context ctxfirefly{ 
 	State s0 initial{ 
    	 	[#  
 		 clearlog("./logs/qakdemo26.log") 	//vedi src/main/resources/logback.xml
 	 	#]
 		println("$name : trying to create fireflies") color cyan
-		forward helper -m start : start(100) //number of flies created
+		forward helper -m start : start(400) //number of flies created
 		[# logger.info(  "${currentState.stateName} Create actors 100 fireflys"  ) #]
 		
 	}
@@ -42,24 +43,49 @@ QActor creator context ctxfirefly{
     	[# System.exit(0) #]
     } 
 }
-	
-QActor firefly context ctxfirefly dynamicOnly {
+
+ExternalQActor griddisplay context ctxgrid
+	QActor firefly context ctxfirefly dynamicOnly {
 	[#  
+		var gridlen = 20
 		var num		= 0
-	  	val DT = (200L..2000L).random()
+	  	val DT = (1000L..2000L).random()
+	  	val id = name.substringAfterLast("_").toInt()
+	  	var Y = id % gridlen 
+	  	var X = id / gridlen
  	#]
 	State s0 initial{
 		println("$name | Hi I'm alive, I blink every $DT ms") color green
 	}
-	Transition t0
-		whenTimeVar  DT -> handleBlink
+	Goto handleBlink
 	
 	State handleBlink{
-		[# num ++ #]
-		println("$name | $num light on") color yellow
-		delay 500
-		println("$name | $num light off") color black
+		[# 
+			num ++ 
+			var Timer = java.util.Random().nextLong(500L,1000L )  
+		#]
+		//TURN ON 
+		//println("$name | $num light on ($X,$Y,1)") color yellow
+		forward griddisplay -m cellstate : cellstate($X,$Y,1)
+		delayVar Timer
+		//TURN OFF
+		//println("$name | $num light off ($X,$Y,0)") color black
+		forward griddisplay -m cellstate : cellstate($X,$Y,0)
 		
 	}Transition t0
 		whenTimeVar  DT -> handleBlink	 
 }  
+
+
+//QActor griddisplaymock context ctxfirefly {
+//	State s0 initial{
+//		printCurrentMessage color cyan
+//	}
+//	Transition t0
+//		whenMsg cellstate -> handleCellState
+//		
+//	State handleCellState{
+//		printCurrentMessage color cyan
+//	}Transition t0
+//		whenMsg cellstate -> handleCellState
+//}

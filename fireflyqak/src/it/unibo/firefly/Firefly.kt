@@ -30,8 +30,12 @@ class Firefly ( name: String, scope: CoroutineScope, isconfined: Boolean=false, 
 		//val interruptedStateTransitions = mutableListOf<Transition>()
 		//IF actor.withobj !== null val actor.withobj.name� = actor.withobj.method�ENDIF
 		  
+				var gridlen = 20
 				var num		= 0
-			  	val DT = (200L..2000L).random()
+			  	val DT = (1000L..2000L).random()
+			  	val id = name.substringAfterLast("_").toInt()
+			  	var Y = id % gridlen 
+			  	var X = id / gridlen
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
@@ -40,17 +44,17 @@ class Firefly ( name: String, scope: CoroutineScope, isconfined: Boolean=false, 
 					}
 					//After Lenzi Aug2002
 					sysaction { //it:State
-				 	 		stateTimer = TimerActor("timer_s0", 
-				 	 					  scope, context!!, "local_tout_"+name+"_s0", DT )  //OCT2023
 					}	 	 
-					 transition(edgeName="t04",targetState="handleBlink",cond=whenTimeout("local_tout_"+name+"_s0"))   
+					 transition( edgeName="goto",targetState="handleBlink", cond=doswitch() )
 				}	 
 				state("handleBlink") { //this:State
 					action { //it:State
-						 num ++  
-						CommUtils.outyellow("$name | $num light on")
-						delay(500) 
-						CommUtils.outblack("$name | $num light off")
+						 
+									num ++ 
+									var Timer = java.util.Random().nextLong(500L,1000L )  
+						forward("cellstate", "cellstate($X,$Y,1)" ,"griddisplay" ) 
+						delay(Timer)
+						forward("cellstate", "cellstate($X,$Y,0)" ,"griddisplay" ) 
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
@@ -58,7 +62,7 @@ class Firefly ( name: String, scope: CoroutineScope, isconfined: Boolean=false, 
 				 	 		stateTimer = TimerActor("timer_handleBlink", 
 				 	 					  scope, context!!, "local_tout_"+name+"_handleBlink", DT )  //OCT2023
 					}	 	 
-					 transition(edgeName="t05",targetState="handleBlink",cond=whenTimeout("local_tout_"+name+"_handleBlink"))   
+					 transition(edgeName="t04",targetState="handleBlink",cond=whenTimeout("local_tout_"+name+"_handleBlink"))   
 				}	 
 			}
 		}
