@@ -29,20 +29,22 @@ class Creator ( name: String, scope: CoroutineScope, isconfined: Boolean=false, 
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
 		//val interruptedStateTransitions = mutableListOf<Transition>()
 		//IF actor.withobj !== null val actor.withobj.name� = actor.withobj.method�ENDIF
+		val GRID_LEN = 20
+				val GRID_SQ = GRID_LEN*GRID_LEN 
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
 						  
 								 clearlog("./logs/qakdemo26.log") 	//vedi src/main/resources/logback.xml
 						CommUtils.outcyan("$name : trying to create fireflies")
-						forward("start", "start(400)" ,"helper" ) 
+						forward("start", "start($GRID_SQ)" ,"helper" ) 
 						 logger.info(  "${currentState.stateName} Create actors 100 fireflys"  )  
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
 					sysaction { //it:State
 				 	 		stateTimer = TimerActor("timer_s0", 
-				 	 					  scope, context!!, "local_tout_"+name+"_s0", 10000.toLong() )  //OCT2023
+				 	 					  scope, context!!, "local_tout_"+name+"_s0", 60000.toLong() )  //OCT2023
 					}	 	 
 					 transition(edgeName="t00",targetState="end",cond=whenTimeout("local_tout_"+name+"_s0"))   
 					transition(edgeName="t01",targetState="buildFireflyActor",cond=whenDispatch("build"))
@@ -63,7 +65,7 @@ class Creator ( name: String, scope: CoroutineScope, isconfined: Boolean=false, 
 					//After Lenzi Aug2002
 					sysaction { //it:State
 				 	 		stateTimer = TimerActor("timer_buildFireflyActor", 
-				 	 					  scope, context!!, "local_tout_"+name+"_buildFireflyActor", 10000.toLong() )  //OCT2023
+				 	 					  scope, context!!, "local_tout_"+name+"_buildFireflyActor", 60000.toLong() )  //OCT2023
 					}	 	 
 					 transition(edgeName="t02",targetState="end",cond=whenTimeout("local_tout_"+name+"_buildFireflyActor"))   
 					transition(edgeName="t03",targetState="buildFireflyActor",cond=whenDispatch("build"))

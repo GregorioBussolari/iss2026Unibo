@@ -1,0 +1,149 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+
+<link rel="stylesheet" type="text/css" href="css/mystyle.css">
+<!--
+    <script type="text/javascript" src="../css/issStyle.js"></script>
+-->
+    
+</head>
+
+<title>Firefly Synch Sensor</title>
+
+<body>
+
+    <div id="top">
+        <h1>Firefly Synch</h1>
+    </div> <div class="body">  
+
+        <h2>Introduction</h2>
+        <div id = "content">
+        Realizzazione di un 
+        <a href='https://anatali.github.io/issLab2026/_static/docs/Protobook.pdf#chapter.17'> sistema firefly </a> che simula 
+        il comportamento di 3 lucciole, gestendo inoltre la sincronizzazione tra queste attraverso un sonar.
+        </div>
+        <h2>Requirements</h2>
+        <div id = "content">
+            <ol>
+                <li> Costruire il simulatore di un sistema costituito da 3 lucciole
+                <li> Le lucciole lampeggiano ciascuna con una frequenza propria e costante
+                <li> Il sistema integra un sonar in grado di misurare la distanza da eventuali ostacoli
+                <li> Esiste una soglia di distanza prefissata, denominata DMIN, configurabile nel sistema.
+                <li> Il sonar monitora continuamente la distanza dall'ostacolo e notifica il sistema quando tale valore cambia.
+                <li> Quando la distanza rilevata dal sonar scende al di sotto di DMIN, tutte le lucciole devono passare alla modalità sincronizzata,
+                <li> Quando la distanza rilevata dal sonar supera nuovamente DMIN, tutte le lucciole devono tornare alla modalità random,
+            </ol>
+            
+        </div>
+        <h2>Requirement analysis</h2>
+        <div id = "content">
+            <ul>
+                    <pre>
+                        System fireflysync Sonar
+
+                        Event sync  : args(X)
+                        Event unsync : args(X)
+                        Dispatch cellstate : cellstate(X, Y, COLOR)
+
+                        // Crea dinamicamente N lucciole all'avvio
+                        QActor creator context ctxfirefly { ... }
+
+                        // Simula il sonar: alterna emissione di sync e unsync con tempi casuali
+                        QActor sonarsimulator context ctxfirefly {
+                            State handleUnsync {
+                                emit unsync : args(Timer)      // ostacolo lontano → lampeggio random
+                            }
+                            Transition t0 whenTimeVar TimerEvent1 -> handleSync
+
+                            State handleSync {
+                                emit sync : args(Timer)        // ostacolo vicino → lampeggio sincronizzato
+                            }
+                            Transition t0 whenTimeVar TimerEvent2 -> handleUnsync
+                        }
+
+                        // Ogni lucciola lampeggia e notifica la propria cella alla griglia
+                        QActor firefly context ctxfirefly dynamicOnly {
+
+                            State flash {                      // modalità random
+                                //TURN ON
+                                delay 500
+                                //TURN OFF
+                            }
+                            Transition t0
+                                whenTimeVar Timer  -> flash
+                                whenEvent   sync   -> syncflash
+
+                            State syncflash {                  // modalità sincronizzata
+                                //TURN ON SYNC
+                                delay 500
+                                //TURN OFF SYNC
+                            }
+                            Transition t0
+                                whenTimeVar Timer  -> syncflash
+                                whenEvent   unsync -> flash
+                        }
+                    </pre>
+            </ul>
+        </div>
+        <h2>Problem analysis</h2>
+        <div id = "content">
+            Per poter definire il sistema, ne viene definito il modello in linguaggio QAK:
+            <ul>
+                <li>Scenario 1: sonarsimulator emette unsync; tutte le firefly passano a flash
+                <li>Scenario 2: sonarsimulator emette sync; tutte le firefly passano a syncflash<br>
+                    In questo caso è necessario che tutte le firefly si sincronizzino ad un unico timer, fornito dall'evento di sincronizzazione.
+                     Si specifica ulteriormente lo stato syncflash fi firefly, andando a modificare il nuovo Timer di sincronizzazione:
+                    <pre>
+                        State syncflash{
+                            // 	printCurrentMessage color magenta
+                            
+                            onMsg(sync: args(Time)){
+                                [#
+                                    Timer = payloadArg(0).toLong()
+                                #]
+                                println("$name | Timer updated to $Timer") color cyan
+                            }
+                            
+                            //TURN ON SYNC
+                            delay 500
+                            //TURN OFF SYNC
+                        }
+                        Transition t0
+                            whenTimeVar Timer  -> syncflash
+                            whenEvent   unsync -> flash
+                   </pre> 
+            </ul>
+        </div>
+        <h2>Test plans</h2> 
+        
+        <h2>Project</h2> 
+        
+        <h2>Testing</h2> 
+         
+        
+        <h2>Deployment</h2> 
+         
+        <h2>Maintenance</h2> 
+         
+        <!-- USEFUL
+        <table style="width:100%" border="1">
+        <tr>
+        <td style="width:50%">
+        </td>
+        <td></td>
+        </tr>
+        </table>
+        -->
+                      
+        <br/><br/> 	
+        </div>  
+        
+        <div style="background-color:rgba(86, 56, 253, 0.9); width:80%;text-align:left;color:white;">
+        By studentName email: gregorio.bussolari@studio.unibo.it, 
+        <!-- <img src="./img/mbot-S.jpg" alt="mbot" width="15%" height="15%"> -->
+        <img src="./img/me.JPG" alt="greg" width="10%" height="10%">
+        GIT repo: <a href="https://github.com/GregorioBussolari/iss2026Unibo.git">https://github.com/GregorioBussolari/iss2026Unibo.git <div>
+        </div> 
+    </body>
+</html>

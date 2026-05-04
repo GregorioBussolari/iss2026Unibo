@@ -1,0 +1,126 @@
+System fireflysync
+
+Event sync : args(X)
+Event unsync : argu(X)
+Dispatch cellstate : cellstate(X,Y,COLOR)
+
+Context ctxfirefly ip [ host="localhost" port=8040 ]
+Context ctxgrid    ip [ host="127.0.0.1"  port=8050 ]
+
+QActor creator context ctxfirefly{
+	State s0 initial{    
+   	 	[#   
+		 clearlog("./logs/app_actorgrid.log") 	//vedi src/main/resources/logback.xml
+	 	#]
+		[# logger.info(  "${currentState.stateName} creates 3 firefly "  ) #]
+//		[#
+//	    	for( i in 0..20 ){
+//	    		for(j in 0..20){
+//	    			CommUtils.outcyan("$name | CREATES firefly_${i}_${j}")  
+//	    			createActorDynamically( "firefly", "_${i}_${j}", false) 
+//	    		}
+//	    	}		 
+//    	#]
+
+		[#
+	    	for( i in 1..3 ){
+	    		CommUtils.outcyan("$name | CREATES firefly_${i}_${0}")  
+	    		createActorDynamically( "firefly", "_${i}_${0}", false) 
+	    	}		 
+    	#]
+	}
+}   
+
+QActor sonarsimulator context ctxfirefly {
+	
+	[# 
+		var DMIN = 100
+		var Timer = java.util.Random().nextLong(600L,1000L)
+		var TimerEvent1 = java.util.Random().nextLong(10000L,20000L)
+		var TimerEvent2 = java.util.Random().nextLong(10000L,20000L)
+ 	#] 
+ 	
+	State s0 initial{
+		println("$name | sonar on") color blue	
+	}
+	Goto handleUnsync
+	
+	State handleUnsync{	
+		println("$name | we are far form $DMIN meters") color blue	
+		emit unsync : argu($Timer)
+	}
+	Transition t0 
+		whenTimeVar TimerEvent1 -> handleSync
+	
+	State handleSync{
+		println("$name | ATTENCTION we are less than $DMIN meters") color blue
+		emit sync : args($Timer)
+	}
+	Transition t0 
+		whenTimeVar TimerEvent2 -> handleUnsync
+}
+
+ExternalQActor griddisplay context ctxgrid
+
+QActor firefly context ctxfirefly dynamicOnly{
+	
+	[# 
+		var X = 0
+		var Y = 0
+	   var Timer = java.util.Random().nextLong(500L,1000L )
+		var TimerUnsync = Timer
+	   fun setCellCoords( )  {
+     		val coords = name.replace("firefly_","").split("_")   
+     		X  = coords[0].toInt()
+     		Y  = coords[1].toInt()        
+  		}
+ 	#] 
+ 	
+	State s0 initial{
+		println("$name | Hi I'm a firefly, I blink every $TimerUnsync ms") color green
+		[# setCellCoords( )  #]
+	}
+	Goto flash
+	
+	State flash{
+		[#
+                Timer = TimerUnsync 
+            #]
+		//TurnoOn
+ 		//println("$name | light on ($X,$Y,1)") color yellow
+ 		forward griddisplay -m  cellstate : cellstate($X,$Y,1)
+ 				
+ 		delay 500	
+		
+		//TurnoOff
+ 		//println("$name | light off ($X,$Y,0)") color black	
+ 		forward griddisplay -m  cellstate : cellstate($X,$Y,0)
+ 				
+	}
+	Transition t0
+		whenTimeVar Timer   -> flash
+	    whenEvent   sync    -> syncflash
+	    
+	State syncflash{
+		// 	printCurrentMessage color magenta
+		
+		onMsg(sync: args(Time)){
+            [#
+                Timer = payloadArg(0).toLong()
+            #]
+            println("$name | Timer updated to $Timer") color cyan
+        }
+        
+		//TurnoOn
+ 		//println("$name | light on ($X,$Y,1)") color yellow
+ 		forward griddisplay -m  cellstate : cellstate($X,$Y,1)
+ 		delay 500	
+		//TurnoOff
+ 		//println("$name | light off ($X,$Y,0)") color black	
+ 		forward griddisplay -m  cellstate : cellstate($X,$Y,0)			
+	}
+	Transition t0
+		whenTimeVar Timer   -> syncflash
+	    whenEvent   unsync    -> flash
+		
+}

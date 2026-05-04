@@ -1,0 +1,105 @@
+System fireflysync
+
+Event sync : time ( X )
+Dispatch cellstate : cellstate(X,Y,COLOR)
+
+Context ctxfirefly ip [ host="localhost" port=8040 ]
+Context ctxgrid    ip [ host="127.0.0.1"  port=8050 ]
+
+QActor creator context ctxfirefly{
+	State s0 initial{    
+   	 	[#   
+		 clearlog("./logs/app_actorgrid.log") 	//vedi src/main/resources/logback.xml
+	 	#]
+		[# logger.info(  "${currentState.stateName} creates 3 firefly "  ) #]
+//		[#
+//	    	for( i in 0..20 ){
+//	    		for(j in 0..20){
+//	    			CommUtils.outcyan("$name | CREATES firefly_${i}_${j}")  
+//	    			createActorDynamically( "firefly", "_${i}_${j}", false) 
+//	    		}
+//	    	}		 
+//    	#]
+
+		[#
+	    	for( i in 1..3 ){
+	    		CommUtils.outcyan("$name | CREATES firefly_${i}_${0}")  
+	    		createActorDynamically( "firefly", "_${i}_${0}", false) 
+	    	}		 
+    	#]
+	}
+}   
+
+QActor fireflyqueen context ctxfirefly {
+	
+	[# 
+		var Timer = java.util.Random().nextLong(2000L,3000L )
+	   var TimeToSync = 10000L
+ 	#] 
+ 	
+	State s0 initial{
+		println("$name | Hi I'm the qeen, my time is $Timer, waiting 10 sec...") color magenta	
+	}
+	Transition t0 
+		whenTimeVar TimeToSync -> handleSync 
+	
+	State handleSync{	
+		println("$name | emit the time $Timer") color green
+		emit sync : time($Timer)
+	}
+	Transition t0 
+		whenTimeVar Timer -> handleSync
+}
+
+ExternalQActor griddisplay context ctxgrid
+
+QActor firefly context ctxfirefly dynamicOnly{
+	
+	[# 
+		var X = 0
+		var Y = 0
+	   var Timer = java.util.Random().nextLong(500L,1000L ) 	
+	   fun setCellCoords( )  {
+     		val coords = name.replace("firefly_","").split("_")   
+     		X  = coords[0].toInt()
+     		Y  = coords[1].toInt()        
+  		}
+ 	#] 
+ 	
+	State s0 initial{
+		println("$name | Hi I'm a firefly, I blink every $Timer ms") color green
+		[# setCellCoords( )  #]
+	}
+	Goto flash
+	
+	State flash{
+		
+		//TurnoOn
+ 		//println("$name | light on ($X,$Y,1)") color yellow
+ 		forward griddisplay -m  cellstate : cellstate($X,$Y,1)
+ 				
+ 		delay 500	
+		
+		//TurnoOff
+ 		//println("$name | light off ($X,$Y,0)") color black	
+ 		forward griddisplay -m  cellstate : cellstate($X,$Y,0)
+ 				
+	}
+	Transition t0
+		whenTimeVar Timer   -> flash
+	    whenEvent   sync    -> syncflash
+	    
+	State syncflash{
+		printCurrentMessage color magenta
+		//TurnoOn
+ 		//println("$name | light on ($X,$Y,1)") color yellow
+ 		forward griddisplay -m  cellstate : cellstate($X,$Y,1)
+ 		delay 500	
+		//TurnoOff
+ 		//println("$name | light off ($X,$Y,0)") color black	
+ 		forward griddisplay -m  cellstate : cellstate($X,$Y,0)			
+	}
+	Transition t0
+		whenEvent   sync    -> syncflash
+		
+}

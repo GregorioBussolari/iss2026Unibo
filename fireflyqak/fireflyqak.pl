@@ -4,6 +4,7 @@
 dispatch( build, build(X) ).
 dispatch( start, arg(NUM) ).
 dispatch( cellstate, cellstate(X,Y,COLOR) ). %set color of cell X,Y
+dispatch( sync, time(TIME) ).
 %====================================================================================
 context(ctxfirefly, "localhost",  "TCP", "8040").
 context(ctxgrid, "127.0.0.1",  "TCP", "8050").

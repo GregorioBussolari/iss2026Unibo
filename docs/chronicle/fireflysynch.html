@@ -1,0 +1,159 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+
+<link rel="stylesheet" type="text/css" href="css/mystyle.css">
+<!--
+    <script type="text/javascript" src="../css/issStyle.js"></script>
+-->
+    
+</head>
+
+<title>Firefly Synch</title>
+
+<body>
+
+    <div id="top">
+        <h1>Firefly Synch</h1>
+    </div> <div class="body">  
+
+        <h2>Introduction</h2>
+        <div id = "content">
+        Realizzazione di un 
+        <a href='https://anatali.github.io/issLab2026/_static/docs/Protobook.pdf#chapter.17'> sistema firefly </a> che simula 
+        il comportamento di 3 lucciole, gestendo inoltre la sincronizzazione tra queste.
+        </div>
+        <h2>Requirements</h2>
+        <div id = "content">
+            <ol>
+                <li> Costruire il simulatore di un sistema costituito da 3 lucciole
+                <li> Le lucciole lampeggiano ciascuna con una frequenza propria e costante
+                <li> Il sistema integra un sonar in grado di misurare la distanza da eventuali ostacoli
+            </ol>
+            
+        </div>
+        <h2>Requirement analysis</h2>
+        <div id = "content">
+            Per poter definire il sistema, ne viene definito il modello in linguaggio QAK:
+            <ul>
+                <li> Le lucciole vengono modellate come QActor in quanto entità indipendenti che non condividono memoria. Il sistema deve compredenere almento 3 lucciole
+                <li> Per realizzare il comportamento da autonomo a sincronizzato, esistono diverse strategie:
+                    <ol>
+                        <li> Potrebbe essere presente un orchestratore (es lucciola regina) che dice dopo 10 secondi quale timer usare. 
+                            L'orchestratore emette una frequenza a cui tutte le lucciole devono stare atteni. Come pro ha che l'orchestratore decide tutto il comportamento
+                            e la politica complessiva del sistema. Può essere presente in più compie per ridondanza.<br>
+                            
+                        <li> Internamente ogni lucciola modifica la propria frequenza ad un valore prestabilito tra tutte, dopo un certo periodo di tempo. Molto semplice
+                            ma può funzionare anche senza un orchestratore (è un componente in più ed è critico)
+                        <li> Ogni lucciola si sincronizza con le altre, al fine di arrivare ad una frequenza condivisa. Coreografia distribuita tra tutte le lucciole.
+                            Come contro ha la complessità
+                    </ol>
+                A livello di progetto, la strategia delel'orchestratore è quello che può essere realizzato con una complessità medio-bassa. In particolare si sceglie 
+                di realizzare l'orchestratore come un QActor, che invia un messaggio di sincronizzazione di priorità
+                più elevata, che detta la frequenza delle altre lucciole. Queste passano da una prorpia frequenza personale, a quella dettata dall'orchestratore.
+                
+                    <pre>
+                        System fireflysync
+                        
+                        //messaggio per la gestione della sincronizzazione, in questa implementazione l'argomento è superfluo
+                        Event sync : time ( X )
+                        
+                        Context ctxfirefly ip [ host="localhost" port=8040 ]
+                        
+                        //QActor responsabile della creazione delle firefly
+                        QActor creator context ctxfirefly{
+                            State s0 initial{      
+                                //initial state:
+                                //Create 3 firefly inst.
+                            }
+                        }   
+
+                        //QActor orchestratore, fireflyqeen, dopo un periodo di 10 secondi, comincia a dettare tramite eventi il timing
+                        QActor fireflyqueen context ctxfirefly {
+	
+                            //init a variable TimeToSync at 10 second
+                             
+                            State s0 initial{
+                                //initial state, wait until 10 second enlapsed
+                            }
+                            Transition t0 
+                                whenTimeVar TimeToSync -> handleSync 
+                            
+                            State handleSync{	
+                                //emit periodically the new time
+                                emit sync : time($Timer)
+                            }
+                            Transition t0 
+                                whenTimeVar Timer -> handleSync
+                        } 
+                        
+                        //QActor firefly definisce il modello della firefly e ne definisce il comportamento
+                        QActor firefly context ctxfirefly dynamicOnly{
+                            
+                            // Definizione delle variabili per la temporizzazione:
+                            // Definisco una variabile Timer
+
+                            State s0 initial{
+                                println("$name | Hi I'm alive, I blink every $Timer ms") color green
+                            }
+                            Goto flash
+
+                            State flash{
+                                
+                                //Turn on the Light
+                                         
+                                //Wait	
+                                
+                                //Turno Off the Light
+                            }
+                            Transition t0
+                                whenTimeVar Timer   -> flash
+                                whenEvent   sync    -> syncflash
+                                
+                            State handleSync{
+                                //Turn on the Light           
+                                //Wait	
+                                //Turno Off the Light
+                            }
+                            Transition t0
+		                        whenEvent   sync    -> syncflash
+                            
+                        }
+                    </pre>
+            </ul>
+        </div>
+        <h2>Problem analysis</h2>
+        <div id = "content">
+        </div>
+        <h2>Test plans</h2> 
+        
+        <h2>Project</h2> 
+        
+        <h2>Testing</h2> 
+         
+        
+        <h2>Deployment</h2> 
+         
+        <h2>Maintenance</h2> 
+         
+        <!-- USEFUL
+        <table style="width:100%" border="1">
+        <tr>
+        <td style="width:50%">
+        </td>
+        <td></td>
+        </tr>
+        </table>
+        -->
+                      
+        <br/><br/> 	
+        </div>  
+        
+        <div style="background-color:rgba(86, 56, 253, 0.9); width:80%;text-align:left;color:white;">
+        By studentName email: gregorio.bussolari@studio.unibo.it, 
+        <!-- <img src="./img/mbot-S.jpg" alt="mbot" width="15%" height="15%"> -->
+        <img src="./img/me.JPG" alt="greg" width="10%" height="10%">
+        GIT repo: <a href="https://github.com/GregorioBussolari/iss2026Unibo.git">https://github.com/GregorioBussolari/iss2026Unibo.git <div>
+        </div> 
+    </body>
+</html>

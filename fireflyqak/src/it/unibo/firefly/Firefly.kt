@@ -30,16 +30,18 @@ class Firefly ( name: String, scope: CoroutineScope, isconfined: Boolean=false, 
 		//val interruptedStateTransitions = mutableListOf<Transition>()
 		//IF actor.withobj !== null val actor.withobj.name� = actor.withobj.method�ENDIF
 		  
-				var gridlen = 20
+				val GRID_LEN = 20
 				var num		= 0
-			  	val DT = (1000L..2000L).random()
-			  	val id = name.substringAfterLast("_").toInt()
-			  	var Y = id % gridlen 
-			  	var X = id / gridlen
+			  	val id = name.substringAfterLast("_").toInt() - 1
+			  	var Y = id % GRID_LEN 
+			  	var X = id / GRID_LEN
+			  	var Timer = java.util.Random().nextLong(500L,1000L ) 
+			  	
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
-						CommUtils.outgreen("$name | Hi I'm alive, I blink every $DT ms")
+						CommUtils.outgreen("$name | Hi I'm alive, I blink every $Timer ms")
+						CommUtils.outgreen("$name | TEMPO ATTUALE: $Timer")
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
@@ -50,9 +52,21 @@ class Firefly ( name: String, scope: CoroutineScope, isconfined: Boolean=false, 
 				state("handleBlink") { //this:State
 					action { //it:State
 						 
-									num ++ 
-									var Timer = java.util.Random().nextLong(500L,1000L )  
+									num ++  
 						forward("cellstate", "cellstate($X,$Y,1)" ,"griddisplay" ) 
+						
+									for(i in -1..1){
+											for(j in -1..1){
+												if (i == 0 && j == 0) continue  // salta se stesso
+										        val nx = X + i
+										        val ny = Y + j
+										        if (nx >= 0 && nx < GRID_LEN && ny >= 0 && ny < GRID_LEN) {
+										        	val id = nx * GRID_LEN + ny + 1
+										            val neighborName = "firefly_${id}"
+										            forward("sync", "time($Timer)", neighborName)
+										        }
+											}
+										}
 						delay(Timer)
 						forward("cellstate", "cellstate($X,$Y,0)" ,"griddisplay" ) 
 						//genTimer( actor, state )
@@ -60,9 +74,34 @@ class Firefly ( name: String, scope: CoroutineScope, isconfined: Boolean=false, 
 					//After Lenzi Aug2002
 					sysaction { //it:State
 				 	 		stateTimer = TimerActor("timer_handleBlink", 
-				 	 					  scope, context!!, "local_tout_"+name+"_handleBlink", DT )  //OCT2023
+				 	 					  scope, context!!, "local_tout_"+name+"_handleBlink", Timer )  //OCT2023
 					}	 	 
 					 transition(edgeName="t04",targetState="handleBlink",cond=whenTimeout("local_tout_"+name+"_handleBlink"))   
+					transition(edgeName="t05",targetState="handleSync",cond=whenDispatch("sync"))
+				}	 
+				state("handleSync") { //this:State
+					action { //it:State
+						CommUtils.outblue("$name in ${currentState.stateName} | $currentMsg | ${Thread.currentThread().getName()} n=${Thread.activeCount()}")
+						 	   
+						if( checkMsgContent( Term.createTerm("time(TIME)"), Term.createTerm("time(TIME)"), 
+						                        currentMsg.msgContent()) ) { //set msgArgList
+								 
+												val arg = payloadArg(0)
+												val timeToShine = arg.toLong()
+								//				if(Timer<timeToShine)
+								//					Timer = timeToShine
+												//sincronizzazione locale per propagazione
+												Timer = (Timer + timeToShine)/2
+						}
+						//genTimer( actor, state )
+					}
+					//After Lenzi Aug2002
+					sysaction { //it:State
+				 	 		stateTimer = TimerActor("timer_handleSync", 
+				 	 					  scope, context!!, "local_tout_"+name+"_handleSync", 50.toLong() )  //OCT2023
+					}	 	 
+					 transition(edgeName="t06",targetState="handleBlink",cond=whenTimeout("local_tout_"+name+"_handleSync"))   
+					transition(edgeName="t07",targetState="handleSync",cond=whenDispatch("sync"))
 				}	 
 			}
 		}

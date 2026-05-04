@@ -34,13 +34,11 @@ class Creator ( name: String, scope: CoroutineScope, isconfined: Boolean=false, 
 					action { //it:State
 						   
 								 clearlog("./logs/app_actorgrid.log") 	//vedi src/main/resources/logback.xml
-						delay(500) 
+						 logger.info(  "${currentState.stateName} creates 3 firefly "  )  
 						
-							    	for( i in 0..19 ){
-							    		for( j in 0..19 ){
-							    			CommUtils.outcyan("$name | CREATES firefly_${i}_${j}")  
-							    			createActorDynamically( "firefly", "_${i}_${j}", false)
-							    		}
+							    	for( i in 1..3 ){
+							    		CommUtils.outcyan("$name | CREATES firefly_${i}")  
+							    		createActorDynamically( "firefly", "_${i}", false)
 							    	}		 
 						//genTimer( actor, state )
 					}

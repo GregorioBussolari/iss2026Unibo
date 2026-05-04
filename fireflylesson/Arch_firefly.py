@@ -25,10 +25,4 @@ with Diagram('fireflyArch', show=False, outformat='png', graph_attr=graphattr) a
   with Cluster('env'):
      sys = Custom('','./qakicons/system.png')
 ### see https://renenyffenegger.ch/notes/tools/Graphviz/attributes/label/HTML-like/index
-     with Cluster('ctxfirefly', graph_attr=nodeattr):
-          creator=Custom('creator','./qakicons/symActorWithobjSmall.png')
-          firefly=Custom('firefly','./qakicons/symActorDynamicWithobj.png')
-     with Cluster('ctxgrid', graph_attr=nodeattr):
-          griddisplay=Custom('griddisplay(ext)','./qakicons/externalQActor.png')
-     firefly >> Edge(color='blue', style='solid',  decorate='true', label='<cellstate &nbsp; >',  fontcolor='blue') >> griddisplay
 diag

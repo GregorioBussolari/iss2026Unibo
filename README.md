@@ -24,3 +24,4 @@
    
  ### Sistema di simulazione Firefly
  * [Firefly simulator](fireflyqak/src): realizzazione in linguaggio QAK di un sistema firefly che simula il comportamento delle lucciole.
+ * [Firefly simulator sync](fireflysync/src): realizzazione in linguaggio QAK di un sistema firefly che simula il comportamento delle lucciole, con vare modalià di sincronizzazione di sincronizzazione.

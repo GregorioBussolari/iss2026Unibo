@@ -30,22 +30,11 @@ class Firefly ( name: String, scope: CoroutineScope, isconfined: Boolean=false, 
 		//val interruptedStateTransitions = mutableListOf<Transition>()
 		//IF actor.withobj !== null val actor.withobj.name� = actor.withobj.method�ENDIF
 		 
-			   var  X          = 0
-			   var  Y          = 0
-			   var Timer       = 500L 
-			   
-			    fun setCellCoords( )  {
-		     		val coords = name.replace("firefly_","").split("_")   
-		     		X  = coords[0].toInt()
-		     		Y  = coords[1].toInt()        
-		  		}		
+			   var Timer = java.util.Random().nextLong(500L,1000L ) 	
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
-						 Timer = java.util.Random().nextLong(1000L,2000L )   
-						 setCellCoords( )                                    
-						CommUtils.outmagenta("$name | X=$X Y=$Y  Timer=$Timer")
-						 logger.info(  "$name  created $X,$Y "  )  
+						CommUtils.outgreen("$name | Hi I'm a firefly, I blink every $Timer ms")
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
@@ -55,9 +44,9 @@ class Firefly ( name: String, scope: CoroutineScope, isconfined: Boolean=false, 
 				}	 
 				state("flash") { //this:State
 					action { //it:State
-						forward("cellstate", "cellstate($X,$Y,1)" ,"griddisplay" ) 
-						delay(500) 
-						forward("cellstate", "cellstate($X,$Y,0)" ,"griddisplay" ) 
+						CommUtils.outyellow("$name | $num light on ($X,$Y,1)")
+						delay(Timer)
+						CommUtils.outblack("$name | $num light off ($X,$Y,0)")
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
@@ -65,7 +54,8 @@ class Firefly ( name: String, scope: CoroutineScope, isconfined: Boolean=false, 
 				 	 		stateTimer = TimerActor("timer_flash", 
 				 	 					  scope, context!!, "local_tout_"+name+"_flash", Timer )  //OCT2023
 					}	 	 
-					 transition(edgeName="t00",targetState="flash",cond=whenTimeout("local_tout_"+name+"_flash"))   
+					 transition(edgeName="t02",targetState="flash",cond=whenTimeout("local_tout_"+name+"_flash"))   
+					transition(edgeName="t03",targetState="flash",cond=whenEvent("sync"))
 				}	 
 			}
 		}

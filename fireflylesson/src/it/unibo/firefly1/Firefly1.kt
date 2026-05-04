@@ -45,13 +45,9 @@ class Firefly1 ( name: String, scope: CoroutineScope, isconfined: Boolean=false,
 				}	 
 				state("flash") { //this:State
 					action { //it:State
-						CommUtils.outmagenta("$name in ${currentState.stateName} | $currentMsg | ${Thread.currentThread().getName()} n=${Thread.activeCount()}")
-						 	   
 						 var Timer = java.util.Random().nextLong(500L,1000L )   
 						delay(Timer)
-						forward("cellstate", "cellstate($X,$Y,1)" ,"griddisplay" ) 
 						delay(Timer)
-						forward("cellstate", "cellstate($X,$Y,0)" ,"griddisplay" ) 
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
