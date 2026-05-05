@@ -32,8 +32,8 @@ class Sonarsimulator ( name: String, scope: CoroutineScope, isconfined: Boolean=
 		 
 				var DMIN = 100
 				var Timer = java.util.Random().nextLong(600L,1000L)
-				var TimerEvent1 = java.util.Random().nextLong(10000L,20000L)
-				var TimerEvent2 = java.util.Random().nextLong(10000L,20000L)
+				var TimerEvent1 = 10000L
+				var TimerEvent2 = 10000L
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State

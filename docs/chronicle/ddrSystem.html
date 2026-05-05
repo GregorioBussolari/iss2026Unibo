@@ -1,0 +1,113 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+
+<link rel="stylesheet" type="text/css" href="css/mystyle.css">
+<!--
+    <script type="text/javascript" src="../css/issStyle.js"></script>
+-->
+    
+</head>
+
+<title>DDR</title>
+
+<body>
+
+    <div id="top">
+        <h1>Differential Drive Robot</h1>
+    </div> <div class="body">  
+
+        <h2>Introduction</h2>
+        <div id = "content">
+        Realizzazione di un sistema software che comanda un Differential Drive Robot (DDR).
+        </div>
+        <h2>Requirements</h2>
+        <div id = "content">
+            <ol>
+                <li> Costruire un sistema software che comanda un Differential Drive Robot (DDR) in modo che, 
+                    partendo dalla posizione iniziale HOME, il robot si sposti lungo il perimetro di una stanza rettangolare vuota.
+                <li> Il DDR si deve fermare quando tornato in HOME.
+                <li> Il DDR è anche sensibile ai dati rilevati da un Radar.
+                <li> Quando il Radar rileva un 'intruso' a una distanza minore di una distanza prefissata 'DMIN':
+                    <ul>
+                     <li>se il DDR si sta muovendo , il DDR si ferma fino a che il Radar non rileva più un 'intruso' così vicino 
+                    <li> se il DDR è fermo in HOME, il DDR ruota su sè stesso fino a che un 'intruso' così vicino scompare
+                    </ul>
+
+            </ol>
+            
+        </div>Il sistema integra un sonar in grado di misurare la distanza da eventuali ostacoli
+        <h2>Requirement analysis</h2>
+        <div id = "content">
+
+            <ul>
+                <li> Il modello qak del sistema risponde al nome di ddrsystem. Questo deve comandare un DDR, rappresentato da un QActor. 
+                    Questo deve avere una posizione iniziale che rappresenta la HOME e deve impostare il comportamento che specifica lo spostamento lungo il perimetro della stanza.
+                    La stanza è rettangolare quindi partendo dalla HOME, il comportamento è ciclico, e ripete le operazoni di movimento in avanti, curva a sinistra/destra per ogni lato della stanza.
+                
+                <li> Se la posizione attuale risulta uguale a HOME, il robot si deve fermare.
+
+                    <pre>
+                        System ddrsystem
+
+                        Context ctxddrsys ip [ host="localhost" port=8040 ]
+
+                        QActor ddr context ctxddrsys {
+                            State s0 initial{
+                                //gestione del movimento lungo il perimetro della stanza
+                            }
+                        }
+                    </pre>
+                
+                <li> Il Radar viene modellato come un attore, che ha il compito di segnalare all'attore qak ddr tramite messaggi la presenza un intruso a una distanza minore di una distanza prefissata 'DMIN'.
+                    <pre>
+                        
+                        // ...
+
+                        QActor radar context ctxddrsys {
+                            State s0 initial{
+                                //gestione della comunicazione con qactor ddr, segnalazione intruso
+                            }
+                        }
+
+                    </pre>
+
+                <li> Il QActor ddr va ulteriormente specificato, in modo che reagisca al segnale dell'attore Radar, a seconda dello stato in cui si trova
+            </ul>
+        </div>
+        <h2>Problem analysis</h2>
+        <div id = "content">
+    
+        </div>
+        <h2>Test plans</h2> 
+        
+        <h2>Project</h2> 
+        
+        <h2>Testing</h2> 
+         
+        
+        <h2>Deployment</h2> 
+         
+        <h2>Maintenance</h2> 
+         
+        <!-- USEFUL
+        <table style="width:100%" border="1">
+        <tr>
+        <td style="width:50%">
+        </td>
+        <td></td>
+        </tr>
+        </table>
+        -->
+                      
+        <br/><br/> 	
+        </div>  
+        
+        <div style="background-color:rgba(86, 56, 253, 0.9); width:80%;text-align:left;color:white;">
+        By studentName email: gregorio.bussolari@studio.unibo.it, 
+        <!-- <img src="./img/mbot-S.jpg" alt="mbot" width="15%" height="15%"> -->
+        <img src="./img/me.JPG" alt="greg" width="10%" height="10%">
+        GIT repo: <a href="https://github.com/GregorioBussolari/iss2026Unibo.git">https://github.com/GregorioBussolari/iss2026Unibo.git <div>
+        </div> 
+    </body>
+</html>

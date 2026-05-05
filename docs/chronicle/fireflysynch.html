@@ -28,102 +28,143 @@
             <ol>
                 <li> Costruire il simulatore di un sistema costituito da 3 lucciole
                 <li> Le lucciole lampeggiano ciascuna con una frequenza propria e costante
-                <li> Il sistema integra un sonar in grado di misurare la distanza da eventuali ostacoli
+                <li> Dopo 10 secondi le lucciole devono lampeggiare in modo sincronizzato
             </ol>
             
         </div>
         <h2>Requirement analysis</h2>
         <div id = "content">
-            Per poter definire il sistema, ne viene definito il modello in linguaggio QAK:
+            
             <ul>
-                <li> Le lucciole vengono modellate come QActor in quanto entità indipendenti che non condividono memoria. Il sistema deve compredenere almento 3 lucciole
-                <li> Per realizzare il comportamento da autonomo a sincronizzato, esistono diverse strategie:
+                <li>Per poter definire il sistema, ne viene definito il modello in linguaggio QAK:
+                Il sistema prende il nome di fireflysync. In primo il comportamento della singola lucciola viene rappresentato da un QActor firefly.  Ognuna delle 3 lucciole,
+                dovendo presentare un comportamento autonomo è realizzata da un QActor distinto. Le lucciole non interagiscono tra di loro, durante il loro tempo di vita. 
+                Il comportamento atteso da ogni firefly, nell'attore QAK è l'alternanza accensione/spegnimento, ad intervalli costanti, definiti per ogni firefly.
+
+            <pre>
+                System fireflysync
+
+                QActor firefly context ctxfirefly{
+                    State s0 initial{
+                        // Definizione del Timer specifico per ogni lucciola
+                    }
+                    Goto flash
+
+                    State flash{
+                        
+                        //Turn on the Light 
+                        //Wait	
+                        //Turno Off the Light
+                    }
+                    Transition t0
+                        whenTimeVar Timer   -> flash
+                }
+            </pre>
+
+            <li> Per realizzare il comportamento da autonomo a sincronizzato<!--, esistono diverse strategie-->:
                     <ol>
-                        <li> Potrebbe essere presente un orchestratore (es lucciola regina) che dice dopo 10 secondi quale timer usare. 
-                            L'orchestratore emette una frequenza a cui tutte le lucciole devono stare atteni. Come pro ha che l'orchestratore decide tutto il comportamento
-                            e la politica complessiva del sistema. Può essere presente in più compie per ridondanza.<br>
+                        <li> si considera la presensza di un orchestratore (es lucciola regina) che dopo 10 secondi
+                             emette una frequenza a cui tutte le lucciole devono stare atteni. Come pro ha che l'orchestratore decide tutto il comportamento
+                            e la politica complessiva del sistema. <!--Può essere presente in più compie per ridondanza.--><br>
                             
-                        <li> Internamente ogni lucciola modifica la propria frequenza ad un valore prestabilito tra tutte, dopo un certo periodo di tempo. Molto semplice
+                       <!-- <li> Internamente ogni lucciola modifica la propria frequenza ad un valore prestabilito tra tutte, dopo un certo periodo di tempo. Molto semplice
                             ma può funzionare anche senza un orchestratore (è un componente in più ed è critico)
                         <li> Ogni lucciola si sincronizza con le altre, al fine di arrivare ad una frequenza condivisa. Coreografia distribuita tra tutte le lucciole.
-                            Come contro ha la complessità
+                            Come contro ha la complessità-->
                     </ol>
-                A livello di progetto, la strategia delel'orchestratore è quello che può essere realizzato con una complessità medio-bassa. In particolare si sceglie 
-                di realizzare l'orchestratore come un QActor, che invia un messaggio di sincronizzazione di priorità
-                più elevata, che detta la frequenza delle altre lucciole. Queste passano da una prorpia frequenza personale, a quella dettata dall'orchestratore.
                 
-                    <pre>
-                        System fireflysync
-                        
-                        //messaggio per la gestione della sincronizzazione, in questa implementazione l'argomento è superfluo
-                        Event sync : time ( X )
-                        
-                        Context ctxfirefly ip [ host="localhost" port=8040 ]
-                        
-                        //QActor responsabile della creazione delle firefly
-                        QActor creator context ctxfirefly{
-                            State s0 initial{      
-                                //initial state:
-                                //Create 3 firefly inst.
-                            }
-                        }   
-
-                        //QActor orchestratore, fireflyqeen, dopo un periodo di 10 secondi, comincia a dettare tramite eventi il timing
-                        QActor fireflyqueen context ctxfirefly {
-	
-                            //init a variable TimeToSync at 10 second
-                             
-                            State s0 initial{
-                                //initial state, wait until 10 second enlapsed
-                            }
-                            Transition t0 
-                                whenTimeVar TimeToSync -> handleSync 
-                            
-                            State handleSync{	
-                                //emit periodically the new time
-                                emit sync : time($Timer)
-                            }
-                            Transition t0 
-                                whenTimeVar Timer -> handleSync
-                        } 
-                        
-                        //QActor firefly definisce il modello della firefly e ne definisce il comportamento
-                        QActor firefly context ctxfirefly dynamicOnly{
-                            
-                            // Definizione delle variabili per la temporizzazione:
-                            // Definisco una variabile Timer
-
-                            State s0 initial{
-                                println("$name | Hi I'm alive, I blink every $Timer ms") color green
-                            }
-                            Goto flash
-
-                            State flash{
-                                
-                                //Turn on the Light
-                                         
-                                //Wait	
-                                
-                                //Turno Off the Light
-                            }
-                            Transition t0
-                                whenTimeVar Timer   -> flash
-                                whenEvent   sync    -> syncflash
-                                
-                            State handleSync{
-                                //Turn on the Light           
-                                //Wait	
-                                //Turno Off the Light
-                            }
-                            Transition t0
-		                        whenEvent   sync    -> syncflash
-                            
-                        }
-                    </pre>
+                    
             </ul>
         </div>
         <h2>Problem analysis</h2>
+        <h3> Analisi del problema come orchestratore</h3>
         <div id = "content">
+            Per gestire la sincronizzazione delle firefly si considera il modello con orchestratore. In particolare si realizza
+             l'orchestratore come un QActor di nome fireflyqueen, che invia un messaggio di sincronizzazione di priorità
+            più elevata, al fine di dettare la frequenza delle altre lucciole. Queste passano da una prorpia frequenza personale, a quella dettata dall'orchestratore.
+            Questo nuovo attore scambia informazini con le lucciole. <br>
+            L'orchestratore dopo un tempo di 10 secondi, emana ad intervalli costanti un evento sync,
+            secondo un timer da lui deciso. Questi eventi dettano il tempo alle lucciole
+
+            <pre>
+                System fireflysync
+                
+                //messaggio per la gestione della sincronizzazione, in questa implementazione l'argomento è superfluo
+                Event sync : time ( X )
+
+                //QActor orchestratore, fireflyqeen, dopo un periodo di 10 secondi, comincia a dettare tramite eventi il timing
+                QActor fireflyqueen context ctxfirefly {
+
+                    //init a variable TimeToSync at 10 second
+                     
+                    State s0 initial{
+                        //initial state, wait until 10 second enlapsed
+                    }
+                    Transition t0 
+                        whenTimeVar TimeToSync -> handleSync 
+                    
+                    State handleSync{	
+                        //emit periodically the new time
+                        emit sync : time($Timer)
+                    }
+                    Transition t0 
+                        whenTimeVar Timer -> handleSync
+                } 
+            </pre>
+
+            La crezione delle lucciole avviene dinamicamente tramite il QActor creator, cui unico scopo è creare le lucciole, etichettate come 
+            dinamicOnly.
+            <pre>
+                               
+                Context ctxfirefly ip [ host="localhost" port=8040 ]
+                
+                //QActor responsabile della creazione delle firefly
+                QActor creator context ctxfirefly{
+                    State s0 initial{      
+                        //initial state:
+                        //Create 3 firefly inst.
+                    }
+                }   
+            </pre>
+
+            Si specifica ulteriormente il comportamento del QActor firefly, il quale per gestire la sincronizzazione, 
+            deve elaborare gli eventi di sincronizzazione periodici e prioritari che manda l'orchestratore.
+            Si definisce pertanto un ulteriore stato handleSync, in cui si accende/spegne la luce della singola firefly al tempo 
+            dettato dall'evento emanato dall'orchestratore.
+            <pre>
+
+                //QActor firefly definisce il modello della firefly e ne definisce il comportamento
+                QActor firefly context ctxfirefly dynamicOnly{
+                    
+                    // Definizione delle variabili per la temporizzazione:
+                    // Definisco una variabile Timer
+
+                    State s0 initial{
+                        //init firefly state
+                    }
+                    Goto flash
+
+                    State flash{
+                        
+                        //Turn on the Light              
+                        //Wait 
+                        //Turno Off the Light
+                    }
+                    Transition t0
+                        whenTimeVar Timer   -> flash
+                        whenEvent   sync    -> syncflash
+                        
+                    State handleSync{
+                        //Turn on the Light           
+                        //Wait	
+                        //Turno Off the Light
+                    }
+                    Transition t0
+                        whenEvent   sync    -> syncflash
+                    
+                }
+
+            </pre>
         </div>
         <h2>Test plans</h2> 
         

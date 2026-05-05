@@ -39,33 +39,103 @@
         <h2>Requirement analysis</h2>
         <div id = "content">
             <ul>
+                <li> Il sistema prende il nome di fireflysync. In primo il comportamento della singola lucciola viene rappresentato da un QActor firefly. Ognuna delle 3 lucciole,
+                    dovendo presentare un comportamento autonomo è realizzata da un QActor distinto. Il comportamento atteso da ogni firefly, nell'attore QAK
+                    è l'alternanza accensione/spegnimento, ad intervalli costanti, definiti per ogni firefly.
+                    Le lucciole non interagiscono tra di loro, durante il loro tempo di vita
                     <pre>
-                        System fireflysync Sonar
-
-                        Event sync  : args(X)
-                        Event unsync : args(X)
-                        Dispatch cellstate : cellstate(X, Y, COLOR)
-
-                        // Crea dinamicamente N lucciole all'avvio
-                        QActor creator context ctxfirefly { ... }
-
-                        // Simula il sonar: alterna emissione di sync e unsync con tempi casuali
-                        QActor sonarsimulator context ctxfirefly {
-                            State handleUnsync {
-                                emit unsync : args(Timer)      // ostacolo lontano → lampeggio random
+                        System fireflysync
+        
+                        QActor firefly context ctxfirefly{
+                            State s0 initial{
+                                // Definizione del Timer specifico per ogni lucciola
                             }
-                            Transition t0 whenTimeVar TimerEvent1 -> handleSync
-
-                            State handleSync {
-                                emit sync : args(Timer)        // ostacolo vicino → lampeggio sincronizzato
+                            Goto flash
+        
+                            State flash{
+                                
+                                //Turn on the Light 
+                                //Wait	
+                                //Turno Off the Light
                             }
-                            Transition t0 whenTimeVar TimerEvent2 -> handleUnsync
+                            Transition t0
+                                whenTimeVar Timer   -> flash
                         }
+                    </pre>
+                
+                <li> Il sonar è rappresentato da un QActor sonarsimulator, cui comportamento consiste nel comunicare periodicamente con le firefly del sistema,
+                    avvertendole tramite messaggi della presenza di ostacoli sotto DIM metri. 
+                    <pre>
+                        QActor sonarsimulator context ctxfirefly {
+                            State s0 initial {
+                                //gestione della distanza dall'ostacolo
+                            }
+                        }
+                    </pre>
+                
+                <li> I QActor firefly devono reagire alla comunicazione con il sonar, cambiando la propria frequenza di lampeggiamento
+            </ul>
+        </div>
+        <h2>Problem analysis</h2>
+        <div id = "content">
+            
+            <li>Si specifica ulteriormente il QActor sonarsimulator:
+            Vengono definiti 2 eventi che si alternano periodicamente tramite l'alternanza di due stati handleSync e handleUnsync.
+            Il primo evento permette di segnalare la distanza dall'ostacolo (unsync), il secondo invece 
+            impone la sincronizzazione in corrispondenza di una distanza minore di DMIN (sync).
+
+            <pre>
+                System fireflysync
+
+                Event sync  : args(X)
+                Event unsync : args(X)
+
+                // Simula il sonar: alterna emissione di sync e unsync con tempi casuali
+                QActor sonarsimulator context ctxfirefly {
+                    State handleUnsync {
+                        emit unsync : args(Timer)      // ostacolo lontano → lampeggio random
+                    }
+                    Transition t0 whenTimeVar TimerEvent1 -> handleSync
+
+                    State handleSync {
+                        emit sync : args(Timer)        // ostacolo vicino → lampeggio sincronizzato
+                    }
+                    Transition t0 whenTimeVar TimerEvent2 -> handleUnsync
+                }
+            </pre>
+
+            <li>La crezione delle lucciole avviene dinamicamente tramite il QActor creator, cui unico scopo è creare le lucciole, etichettate come 
+                dinamicOnly.
+                <pre>
+                                   
+                    Context ctxfirefly ip [ host="localhost" port=8040 ]
+                    
+                    //QActor responsabile della creazione delle firefly
+                    QActor creator context ctxfirefly{
+                        State s0 initial{      
+                            //initial state:
+                            //Create 3 firefly inst.
+                        }
+                    }   
+                </pre>
+
+            <li> Si specifica ulteriormente il comportamento del QActor firefly: si specifica ulteriormente il comportamento del QActor firefly, il quale per gestire la sincronizzazione, 
+            deve elaborare gli eventi di sincronizzazione periodici e prioritari che manda sonarsimulator<br>
+            
+            Scenario 1: sonarsimulator emette unsync; tutte le firefly passano a flash<br>
+            Scenario 2: sonarsimulator emette sync; tutte le firefly passano a syncflash<br>
+                    
+            In questo caso è necessario che tutte le firefly si sincronizzino ad un unico timer, fornito dall'evento di sincronizzazione.
+                     Si specifica ulteriormente lo stato syncflash di firefly, andando a modificare il nuovo Timer di sincronizzazione:
+                    <pre>
 
                         // Ogni lucciola lampeggia e notifica la propria cella alla griglia
                         QActor firefly context ctxfirefly dynamicOnly {
 
                             State flash {                      // modalità random
+                                [#
+                                    Timer = TimerUnsync 
+                                #]
                                 //TURN ON
                                 delay 500
                                 //TURN OFF
@@ -75,6 +145,14 @@
                                 whenEvent   sync   -> syncflash
 
                             State syncflash {                  // modalità sincronizzata
+
+                                onMsg(sync: args(Time)){
+                                    [#
+                                        Timer = payloadArg(0).toLong()
+                                    #]
+                                    println("$name | Timer updated to $Timer") color cyan
+                                }
+                                
                                 //TURN ON SYNC
                                 delay 500
                                 //TURN OFF SYNC
@@ -83,37 +161,8 @@
                                 whenTimeVar Timer  -> syncflash
                                 whenEvent   unsync -> flash
                         }
-                    </pre>
-            </ul>
-        </div>
-        <h2>Problem analysis</h2>
-        <div id = "content">
-            Per poter definire il sistema, ne viene definito il modello in linguaggio QAK:
-            <ul>
-                <li>Scenario 1: sonarsimulator emette unsync; tutte le firefly passano a flash
-                <li>Scenario 2: sonarsimulator emette sync; tutte le firefly passano a syncflash<br>
-                    In questo caso è necessario che tutte le firefly si sincronizzino ad un unico timer, fornito dall'evento di sincronizzazione.
-                     Si specifica ulteriormente lo stato syncflash fi firefly, andando a modificare il nuovo Timer di sincronizzazione:
-                    <pre>
-                        State syncflash{
-                            // 	printCurrentMessage color magenta
-                            
-                            onMsg(sync: args(Time)){
-                                [#
-                                    Timer = payloadArg(0).toLong()
-                                #]
-                                println("$name | Timer updated to $Timer") color cyan
-                            }
-                            
-                            //TURN ON SYNC
-                            delay 500
-                            //TURN OFF SYNC
-                        }
-                        Transition t0
-                            whenTimeVar Timer  -> syncflash
-                            whenEvent   unsync -> flash
+
                    </pre> 
-            </ul>
         </div>
         <h2>Test plans</h2> 
         
