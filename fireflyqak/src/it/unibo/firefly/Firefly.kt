@@ -42,6 +42,7 @@ class Firefly ( name: String, scope: CoroutineScope, isconfined: Boolean=false, 
 					action { //it:State
 						CommUtils.outgreen("$name | Hi I'm alive, I blink every $Timer ms")
 						CommUtils.outgreen("$name | TEMPO ATTUALE: $Timer")
+						forward("cellstate", "cellstate($X,$Y,0)" ,"griddisplay" ) 
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
@@ -54,6 +55,8 @@ class Firefly ( name: String, scope: CoroutineScope, isconfined: Boolean=false, 
 						 
 									num ++  
 						forward("cellstate", "cellstate($X,$Y,1)" ,"griddisplay" ) 
+						delay(500) 
+						forward("cellstate", "cellstate($X,$Y,0)" ,"griddisplay" ) 
 						
 									for(i in -1..1){
 											for(j in -1..1){
@@ -67,8 +70,6 @@ class Firefly ( name: String, scope: CoroutineScope, isconfined: Boolean=false, 
 										        }
 											}
 										}
-						delay(Timer)
-						forward("cellstate", "cellstate($X,$Y,0)" ,"griddisplay" ) 
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
@@ -90,8 +91,10 @@ class Firefly ( name: String, scope: CoroutineScope, isconfined: Boolean=false, 
 												val timeToShine = arg.toLong()
 								//				if(Timer<timeToShine)
 								//					Timer = timeToShine
-												//sincronizzazione locale per propagazione
+												//sincronizzazione locale per propagazione asintotica
 												Timer = (Timer + timeToShine)/2
+												
+											
 						}
 						//genTimer( actor, state )
 					}

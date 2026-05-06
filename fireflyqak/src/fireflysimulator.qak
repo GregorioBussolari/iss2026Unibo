@@ -61,6 +61,7 @@ ExternalQActor griddisplay context ctxgrid
 	State s0 initial{
 		println("$name | Hi I'm alive, I blink every $Timer ms") color green
 		println("$name | TEMPO ATTUALE: $Timer") color green
+		forward griddisplay -m cellstate : cellstate($X,$Y,0)	
 	}
 	Goto handleBlink
 	
@@ -71,6 +72,13 @@ ExternalQActor griddisplay context ctxgrid
 		//TURN ON 
 		//println("$name | $num light on ($X,$Y,1)") color yellow
 		forward griddisplay -m cellstate : cellstate($X,$Y,1)
+		
+		delay 500
+		
+		//TURN OFF
+		//println("$name | $num light off ($X,$Y,0)") color black
+		forward griddisplay -m cellstate : cellstate($X,$Y,0)
+		
 		
 		//Gestione sincronizzazione: i dispatch per ogni vicino
 		[#
@@ -88,12 +96,6 @@ ExternalQActor griddisplay context ctxgrid
 				}
 		#]
 		
-		delayVar Timer
-		
-		//TURN OFF
-		//println("$name | $num light off ($X,$Y,0)") color black
-		forward griddisplay -m cellstate : cellstate($X,$Y,0)
-		
 		
 		//println("$name | TEMPO ATTUALE da blink: $Timer")
 		
@@ -109,13 +111,14 @@ ExternalQActor griddisplay context ctxgrid
 				val timeToShine = arg.toLong()
 //				if(Timer<timeToShine)
 //					Timer = timeToShine
-				//sincronizzazione locale per propagazione
+				//sincronizzazione locale per propagazione asintotica
 				Timer = (Timer + timeToShine)/2
+				
+			
 			#]
-			//println("$name | TEMPO ATTUALE da sync: $Timer")
 			
 		}
-	}Transition t0 whenTime 50   -> handleBlink      // coda vuota: riparte
+	}Transition t0 whenTime 50  -> handleBlink      // coda vuota: riparte
    		 whenMsg  sync -> handleSync       // svuota tutta la coda sync
 		
 }  

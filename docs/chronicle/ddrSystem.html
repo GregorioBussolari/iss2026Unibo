@@ -41,38 +41,82 @@
         <div id = "content">
 
             <ul>
-                <li> Il modello qak del sistema risponde al nome di ddrsystem. Questo deve comandare un DDR, rappresentato da un QActor. 
-                    Questo deve avere una posizione iniziale che rappresenta la HOME e deve impostare il comportamento che specifica lo spostamento lungo il perimetro della stanza.
-                    La stanza è rettangolare quindi partendo dalla HOME, il comportamento è ciclico, e ripete le operazoni di movimento in avanti, curva a sinistra/destra per ogni lato della stanza.
-                
-                <li> Se la posizione attuale risulta uguale a HOME, il robot si deve fermare.
+                <li> Il modello qak del sistema risponde al nome di ddrsystem.<br><br>
+                     Il sistema deve comandare un DDR, pertanto deve essere un attuatore di comandi verso il ddr. <br>
+                    Per modellare il sistema è necessario definire un QActor che controlla il ddr, che prende il nome di <b>mind</b>.<br> 
+                    Questo attore deve pertanto impostare il comportamento che specifica lo spostamento lungo il perimetro della stanza. <br>
+                    La dimensione di un ddr viene definita come una unità robotica.<br>
+                    
+                    <img src = "img/planroom.png" width="400px"><br>
+                    La stanza in cui si muove il ddr presenta le seguenti caratteristiche:
+                    Una altezza H e una base B, numero reale misurato in unità robotiche. <br>
 
+                    Il ddr deve partire da una posizione iniziale HOME. Si definisce pertanto la HOME come l'area (0,0)-(1,1) in unità robot facendo riferimento al sistema stanza.
+                    
+                <li>Il ddr è un servizio che risponde ai comandi del sistema e pertanto al QActor mind. <br>
+                    La distanza DMIN viene definita come una variabile reale, anch'essa in unità robotiche.<br>
+                    <br>
+                    Il sistema pertanto dovrà comunicare con il servizio ddr, sia per governare il movimento lungo il 
+                    perimetro della stanza, oppure per gestire la risposta agli eventi scatenati dal radar.
+                    
+                   <br> Il modello qak finora delineato è il seguente:
                     <pre>
                         System ddrsystem
 
                         Context ctxddrsys ip [ host="localhost" port=8040 ]
 
-                        QActor ddr context ctxddrsys {
+                        QActor mind context ctxddrsys {
+
+                            [#
+                                var H //altezza della stanza in unità robotiche
+                                var B //base della stanza in unità robotiche
+                                var HOME_X = 1 //limite area HOME in unità robotiche
+                                var HOME_Y = 1 //limite area HOME in unità robotiche
+                                val DMIN  // distanza minima in unità robotiche
+                            #]
+
                             State s0 initial{
-                                //gestione del movimento lungo il perimetro della stanza
+                                //gestione del movimento del ddr        
                             }
+                            
                         }
                     </pre>
+            
                 
-                <li> Il Radar viene modellato come un attore, che ha il compito di segnalare all'attore qak ddr tramite messaggi la presenza un intruso a una distanza minore di una distanza prefissata 'DMIN'.
+                <li> Il Radar viene modellato come un attore, che ha il compito di rilevare gli oggetti nel suo campo d'azione, 
+                    fornendo la distanza rilevata rispetto ad essi.
+                    <br>
+                    Si definisce la distanza come una variabile reale D in metri.<br>
+                    
+                    Il radar può essere rappresentato secondo 2 modelli di funzionamento:
+                    <ol>
+                        <li> Il radar emette un evento periodico, per avvertire della distanza attuale da ciò che rileva.
+                        <li> Il radar risponde ad una richiesta di distanza, fornendo la risposta attuale
+                    </ol>
+
+                    Da cui il modello qak seguente:
                     <pre>
                         
-                        // ...
+                        //modello ad evento periodico 
+                        event radar : distanza (D) //distanza in metri
+
+                        //modello a request/response
+                        Request getdistance : getdistance(X) //richiesta distanza attuale
+                        Reply   currentdistance : currentdistance(D)   //risposta radar, distanza
+                        
+                        
+                        // QActor ddrsystem
 
                         QActor radar context ctxddrsys {
+                            
+                            [# var D #] //distanza rilevata in metri
+
                             State s0 initial{
-                                //gestione della comunicazione con qactor ddr, segnalazione intruso
+                                //gestione della comunicazione con qactor ddr, segnalazione distanza
                             }
                         }
 
                     </pre>
-
-                <li> Il QActor ddr va ulteriormente specificato, in modo che reagisca al segnale dell'attore Radar, a seconda dello stato in cui si trova
             </ul>
         </div>
         <h2>Problem analysis</h2>
