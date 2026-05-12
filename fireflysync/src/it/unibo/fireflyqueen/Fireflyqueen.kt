@@ -20,7 +20,7 @@ import org.json.simple.JSONObject
 
 //User imports JAN2024
 
-class Fireflyqueen ( name: String, scope: CoroutineScope, isconfined: Boolean=false, isdynamic: Boolean=false ) : 
+class Fireflyqueen ( name: String, scope: CoroutineScope, isconfined: Boolean=false, isdynamic: Boolean=true ) : 
           ActorBasicFsm( name, scope, confined=isconfined, dynamically=isdynamic ){
 
 	override fun getInitialState() : String{
@@ -30,12 +30,12 @@ class Fireflyqueen ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 		//val interruptedStateTransitions = mutableListOf<Transition>()
 		//IF actor.withobj !== null val actor.withobj.name� = actor.withobj.method�ENDIF
 		 
-				var Timer = java.util.Random().nextLong(2000L,3000L )
-			   var TimeToSync = 10000L
+				var Timer = java.util.Random().nextLong(500L,1000L )
+			   var TimeToSync = 10000	
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
-						CommUtils.outmagenta("$name | Hi I'm the qeen, my time is $Timer, waiting 10 sec...")
+						CommUtils.outgreen("$name | Hi I'm the qeen, my time is $Timer, waiting 10 sec...")
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
@@ -47,7 +47,6 @@ class Fireflyqueen ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 				}	 
 				state("handleSync") { //this:State
 					action { //it:State
-						CommUtils.outgreen("$name | emit the time $Timer")
 						emit("sync", "time($Timer)" ) 
 						//genTimer( actor, state )
 					}

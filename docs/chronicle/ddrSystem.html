@@ -39,19 +39,18 @@
         </div>Il sistema integra un sonar in grado di misurare la distanza da eventuali ostacoli
         <h2>Requirement analysis</h2>
         <div id = "content">
-
+                    Con ddr si intende un robot inscrivibile in un qadrato di lato R.
+                    La dimensione di un ddr viene definita come una unità robotica.<br>
+                    La stanza in cui si muove il ddr presenta le seguenti caratteristiche:
+                    Una altezza H e una base B, numero reale misurato in unità robotiche. <br>
+                    Il modello della stanza è pertanto formalizzato come una griglia:
+                    <img src = "img/planroom.png" width="400px"><br>
+                    Il ddr deve partire da una posizione iniziale HOME. Si definisce pertanto la HOME come l'area (0,0)-(1,1) in unità robot facendo riferimento al sistema stanza.<br><br>
             <ul>
-                <li> Il modello qak del sistema risponde al nome di ddrsystem.<br><br>
+                <li> Il modello qak del sistema risponde al nome di ddrsystem.<br>
                      Il sistema deve comandare un DDR, pertanto deve essere un attuatore di comandi verso il ddr. <br>
                     Per modellare il sistema è necessario definire un QActor che controlla il ddr, che prende il nome di <b>mind</b>.<br> 
                     Questo attore deve pertanto impostare il comportamento che specifica lo spostamento lungo il perimetro della stanza. <br>
-                    La dimensione di un ddr viene definita come una unità robotica.<br>
-                    
-                    <img src = "img/planroom.png" width="400px"><br>
-                    La stanza in cui si muove il ddr presenta le seguenti caratteristiche:
-                    Una altezza H e una base B, numero reale misurato in unità robotiche. <br>
-
-                    Il ddr deve partire da una posizione iniziale HOME. Si definisce pertanto la HOME come l'area (0,0)-(1,1) in unità robot facendo riferimento al sistema stanza.
                     
                 <li>Il ddr è un servizio che risponde ai comandi del sistema e pertanto al QActor mind. <br>
                     La distanza DMIN viene definita come una variabile reale, anch'essa in unità robotiche.<br>
@@ -89,19 +88,26 @@
                     Si definisce la distanza come una variabile reale D in metri.<br>
                     
                     Il radar può essere rappresentato secondo 2 modelli di funzionamento:
-                    <ol>
+                    <ol type="A">
                         <li> Il radar emette un evento periodico, per avvertire della distanza attuale da ciò che rileva.
                         <li> Il radar risponde ad una richiesta di distanza, fornendo la risposta attuale
                     </ol>
+                            
+                    <!--Il committente fornisce un radar che rileva le distanza su richiesta. 
+                    Il virtual robot è il modo giusto per affrontare i problemi richiesti?
+                    Andando avanti per questa strada è necessario colmare l'abstraction gap, tra
+                    la tecnologia richiesta per la comunicazione con il virtual robot 
+                    (sincrono/asincrono, comunicazione websocket/http)-->
+
 
                     Da cui il modello qak seguente:
                     <pre>
                         
-                        //modello ad evento periodico 
+                        //modello A: ad evento periodico 
                         event radar : distanza (D) //distanza in metri
 
-                        //modello a request/response
-                        Request getdistance : getdistance(X) //richiesta distanza attuale
+                        //modello B: a request/response
+                        Request getsonardistance : getdistance(X) //richiesta distanza attuale
                         Reply   currentdistance : currentdistance(D)   //risposta radar, distanza
                         
                         
@@ -112,7 +118,18 @@
                             [# var D #] //distanza rilevata in metri
 
                             State s0 initial{
-                                //gestione della comunicazione con qactor ddr, segnalazione distanza
+                                
+                            }Goto handleDistance
+
+                            //gestione della comunicazione con qactor ddr, segnalazione distanza
+                            State handleDistance{
+                                emit radar : distance($D)
+                            }Transition t0 
+                                whenRequest getsonardistance -> requestedDistance
+
+                            State requestedDistance{
+                                //elab request
+                                replyTo getsonardistance with currentdistance : currentdistance($D)
                             }
                         }
 
