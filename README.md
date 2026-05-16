@@ -1,8 +1,5 @@
 # issLab2026
  Laboratorio di <b>Ingegneria dei Sistemi Software</b> a.a. 2025/2026 di Bussolari Gregorio S0001237652
-
- [Testo di riferimento:](https://GregorioBussolari.github.io/iss2026Unibo/_static/docs/Protobook.pdf)
- <!-- comment: [ancora personalizzata] -->
  
  # Chronicle [index](https://GregorioBussolari.github.io/iss2026Unibo/chronicle/index.html)
 
