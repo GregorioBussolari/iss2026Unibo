@@ -1,16 +1,12 @@
 %====================================================================================
 % fireflysync description   
 %====================================================================================
-event( sync, args(X) ).
-event( unsync, argu(X) ).
-dispatch( cellstate, cellstate(X,Y,COLOR) ).
+event( sync, time(X) ).
 %====================================================================================
 context(ctxfirefly, "localhost",  "TCP", "8040").
-context(ctxgrid, "127.0.0.1",  "TCP", "8050").
  qactor( creator, ctxfirefly, "it.unibo.creator.Creator").
  static(creator).
-  qactor( sonarsimulator, ctxfirefly, "it.unibo.sonarsimulator.Sonarsimulator").
- static(sonarsimulator).
-  qactor( griddisplay, ctxgrid, "external").
+  qactor( fireflyqueen, ctxfirefly, "it.unibo.fireflyqueen.Fireflyqueen").
+dynamic(fireflyqueen). %%Oct2023 
   qactor( firefly, ctxfirefly, "it.unibo.firefly.Firefly").
 dynamic(firefly). %%Oct2023 

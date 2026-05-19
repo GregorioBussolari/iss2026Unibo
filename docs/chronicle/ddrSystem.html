@@ -44,8 +44,9 @@
                     La stanza in cui si muove il ddr presenta le seguenti caratteristiche:
                     Una altezza H e una base B, numero reale misurato in unità robotiche. <br>
                     Il modello della stanza è pertanto formalizzato come una griglia:
+                    <pre> val room = Array(H) { IntArray(B) } </pre>
                     <img src = "img/planroom.png" width="400px"><br>
-                    Il ddr deve partire da una posizione iniziale HOME. Si definisce pertanto la HOME come l'area (0,0)-(1,1) in unità robot facendo riferimento al sistema stanza.<br><br>
+                    Il ddr deve partire da una posizione iniziale HOME. Si definisce pertanto la HOME come l'area (0,0)-(1,1) in unità robot facendo riferimento al sistema stanza, ovvero la cella della griglia di indice (0,0).<br><br>
             <ul>
                 <li> Il modello qak del sistema risponde al nome di ddrsystem.<br>
                      Il sistema deve comandare un DDR, pertanto deve essere un attuatore di comandi verso il ddr. <br>
@@ -69,8 +70,7 @@
                             [#
                                 var H //altezza della stanza in unità robotiche
                                 var B //base della stanza in unità robotiche
-                                var HOME_X = 1 //limite area HOME in unità robotiche
-                                var HOME_Y = 1 //limite area HOME in unità robotiche
+                                val room = Array(H) { IntArray(B) }
                                 val DMIN  // distanza minima in unità robotiche
                             #]
 

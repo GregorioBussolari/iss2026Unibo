@@ -37,8 +37,8 @@ class Creator ( name: String, scope: CoroutineScope, isconfined: Boolean=false, 
 						 logger.info(  "${currentState.stateName} creates 3 firefly "  )  
 						
 							    	for( i in 1..3 ){
-							    		CommUtils.outcyan("$name | CREATES firefly_${i}_${0}")  
-							    		createActorDynamically( "firefly", "_${i}_${0}", false) 
+							    		CommUtils.outcyan("$name | CREATES firefly_${i}")  
+							    		createActorDynamically( "firefly", "_${i}", false) 
 							    	}		 
 						//genTimer( actor, state )
 					}

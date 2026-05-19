@@ -52,7 +52,10 @@ public class RobotObj26  implements IRobotBasicMoves {
     	return new RobotObj26( vitualRobotIp, observer, LogFName  );
     }
     
-    //Constructor
+    //Constructor, riceve ip del virtual robot
+    // Poi riceve il log file name, per scrivere le ingormazioni di log
+    // observer: ha il compito di utilizzare l'ogetto robot e vuole relazionarsi con il virtual robot, come suo osservatore.
+    // il virtual robot senza robot obj non può funzionare.
     public RobotObj26(String virtualRobotIp, IObserverMsg observer, String LogFName) {
         this.observerHl= observer;    	
         this.LogFName  = LogFName;

@@ -140,7 +140,7 @@ BUSINESS LOGIC
 	 */
 	
 	public void walkAtBoundary() {
-        CommUtils.waitTheUser("walkAtBoundary PUT ROBOT in HOME and hit");
+        //CommUtils.waitTheUser("walkAtBoundary PUT ROBOT in HOME and hit");
 		count   = 1;
 		//callWS( haltcmd );CommUtils.delay(30); //TO avoid notallowed
 		callWS(  forwardlongcmd  );  //deve terminare con una collisione anche se dura di più

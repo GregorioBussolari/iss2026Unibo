@@ -30,20 +30,11 @@ class Firefly ( name: String, scope: CoroutineScope, isconfined: Boolean=false, 
 		//val interruptedStateTransitions = mutableListOf<Transition>()
 		//IF actor.withobj !== null val actor.withobj.name� = actor.withobj.method�ENDIF
 		 
-				var X = 0
-				var Y = 0
-			   var Timer = java.util.Random().nextLong(500L,1000L )
-				var TimerUnsync = Timer
-			   fun setCellCoords( )  {
-		     		val coords = name.replace("firefly_","").split("_")   
-		     		X  = coords[0].toInt()
-		     		Y  = coords[1].toInt()        
-		  		}
+			   var Timer = java.util.Random().nextLong(500L,1000L ) 	
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
-						CommUtils.outgreen("$name | Hi I'm a firefly, I blink every $TimerUnsync ms")
-						 setCellCoords( )   
+						CommUtils.outgreen("$name | Hi I'm a firefly, I blink every $Timer ms")
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
@@ -53,11 +44,9 @@ class Firefly ( name: String, scope: CoroutineScope, isconfined: Boolean=false, 
 				}	 
 				state("flash") { //this:State
 					action { //it:State
-						
-						                Timer = TimerUnsync 
-						forward("cellstate", "cellstate($X,$Y,1)" ,"griddisplay" ) 
-						delay(500) 
-						forward("cellstate", "cellstate($X,$Y,0)" ,"griddisplay" ) 
+						CommUtils.outyellow("$name | $num light on ($X,$Y,1)")
+						delay(Timer)
+						CommUtils.outblack("$name | $num light off ($X,$Y,0)")
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
@@ -66,28 +55,7 @@ class Firefly ( name: String, scope: CoroutineScope, isconfined: Boolean=false, 
 				 	 					  scope, context!!, "local_tout_"+name+"_flash", Timer )  //OCT2023
 					}	 	 
 					 transition(edgeName="t02",targetState="flash",cond=whenTimeout("local_tout_"+name+"_flash"))   
-					transition(edgeName="t03",targetState="syncflash",cond=whenEvent("sync"))
-				}	 
-				state("syncflash") { //this:State
-					action { //it:State
-						if( checkMsgContent( Term.createTerm("args(X)"), Term.createTerm("args(Time)"), 
-						                        currentMsg.msgContent()) ) { //set msgArgList
-								
-								                Timer = payloadArg(0).toLong()
-								CommUtils.outcyan("$name | Timer updated to $Timer")
-						}
-						forward("cellstate", "cellstate($X,$Y,1)" ,"griddisplay" ) 
-						delay(500) 
-						forward("cellstate", "cellstate($X,$Y,0)" ,"griddisplay" ) 
-						//genTimer( actor, state )
-					}
-					//After Lenzi Aug2002
-					sysaction { //it:State
-				 	 		stateTimer = TimerActor("timer_syncflash", 
-				 	 					  scope, context!!, "local_tout_"+name+"_syncflash", Timer )  //OCT2023
-					}	 	 
-					 transition(edgeName="t04",targetState="syncflash",cond=whenTimeout("local_tout_"+name+"_syncflash"))   
-					transition(edgeName="t05",targetState="flash",cond=whenEvent("unsync"))
+					transition(edgeName="t03",targetState="flash",cond=whenEvent("sync"))
 				}	 
 			}
 		}
