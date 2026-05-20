@@ -1,0 +1,50 @@
+System ddrboundary
+
+Dispatch move : move(M) //"M = l|r|a|d|h mosse aril ok"
+Request cmd : cmd(MOVE,T) //"MOVE = w|s mosse aril asynch"
+
+Reply cmddone : cmddone(R) for cmd
+Reply cmdfailed : cmdfailed(T,CAUSE) for cmd
+
+Request step : step(TIME)
+Reply stepdone : stepdone(V) for step
+Reply stepfailed : stepfailed(DURATION, CAUSE) for step
+
+Context ctxboundary ip [host="localhost" port=8125]
+Context ctxrobotservice26 ip [host="127.0.0.1" port=8125] //stesso nodo
+//Context ctxradar ip [host="192.168.1.xxx" port=8135] //stesso nodo
+
+ExternalQActor robotactor context ctxrobotservice26
+
+QActor boundaryworker context ctxboundary {
+    [# val MAX_TURNS = 4; var turns = 0 #]
+
+    State s0 initial {
+        println("$name START") color blue
+    } Goto walking
+
+    State walking {
+        println("$name | going straight") color green
+        request robotactor -m step:step(2500)
+    } Transition t0
+        whenReply stepdone  -> walking
+        whenReply stepfailed -> turning
+
+    State turning {
+        [# turns++ #]
+        println("$name | wall hit ($turns/$MAX_TURNS), turning left") color yellow
+        forward robotactor -m move:move(l)
+        
+        if [# turns >= MAX_TURNS #] { 
+	        forward robotactor -m move:move(h) 
+	        println("$name | boundary walk complete after $turns turns") color red
+	        [#System.exit(0)#]
+	    }
+    } Goto walking
+
+
+}
+
+//QActor radaractor context ctxradar {
+	//Interazione con il PicoW per rilevare la distanza e inviare i dati al boundaryworker
+//}
