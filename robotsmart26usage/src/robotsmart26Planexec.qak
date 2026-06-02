@@ -1,0 +1,85 @@
+System robotsmart26usage
+	mqttBroker "localhost" : 1883 eventTopic "robotsmartusage26in"  //SE definita MQTTBROKER, usa quell'addr
+
+/*
+ * ------------------------------------------------
+ * Handled by robotsmart
+ * ------------------------------------------------
+*/
+Request  buildPlan   : buildPlan( PX,PY,TX,TY  )		"create plan from (PX,PY) to (TX,TY)"
+Reply buildPlanDone  : buildPlanDone( PLAN ) for buildPlan
+
+Request moverobot    :  moverobot(TARGETX, TARGETY,STEPTIME)  	"move from current pos to (TARGETX,TARGETY)"
+Reply moverobotdone  :  moverobotok(ARG)                    for moverobot
+Reply moverobotfailed:  moverobotfailed(PLANDONE, PLANTODO) for moverobot
+
+Dispatch noplan           : noplan(X)       //autodispatch  
+Dispatch setplanbuildelay : value(V)		"parameter = V >= 0"
+
+Request  doplan     : doplan( PLAN, STEPTIME )	"execute PLAN with STEPTIME"
+Reply doplandone    : doplandone( ARG )         for doplan
+Reply doplanfailed  : doplanfailed( PLANTODO )  for doplan
+
+Request step       : step(TIME)	                        "step command for TIME duration"
+Reply stepdone     : stepdone(V)                 for step
+Reply stepfailed   : stepfailed(DURATION, CAUSE) for step
+ 
+Dispatch move      : move(M)  "MOVE = l|r|a|d|h   mosse aril sincrone ok"
+Dispatch setrobotstate: setpos(X,Y,D) 		"set robot position to (X,Y) direction D=up|down|left|right" 
+
+Request setdirection : dir( D )  			"set robot direction to D=up|down|left|right" 
+Reply setdirectiondone : pos(PX,PY) for setdirection
+
+Request getrobotstate : getrobotstate(ARG)		"request robot state ARG unused"
+Reply robotstate      : robotstate(POS,DIR)  for getrobotstate  "POS->pos(X,Y) DIR->up|down|left|right"
+
+Event alarm   : alarm(X)		"event at application level"
+
+Context ctxrobotsmartusage ip [host="localhost" port=8120]
+Context ctxrobotsmart      ip [host="127.0.0.1" port=8020]
+
+ExternalQActor robotsmart context ctxrobotsmart
+
+QActor robotsmartusage context ctxrobotsmartusage{
+	[#
+		val StepTime = 345 
+		val NLAP = 0
+	#]
+	State s0 initial{
+		println("$name | starts ") color blue
+		[# clearlog("./logs/robotsmart26usage.log") 			//vedi src/main/resources/logback.xml #]
+	}
+	Goto doplan
+	
+	State doplan{
+		[# val Plan = "llllllllllllllllllll"#]
+		println("$name | doplan $Plan") color blue
+		
+		request robotsmart -m doplan:doplan($Plan, $StepTime)
+		delay 4000
+		emit alarm:alarm(X)
+		
+	}Transition t0
+		whenReply doplandone -> handleReplyDone
+		whenReply doplanfailed -> handleReplyFailed
+		
+	State handleReplyDone{
+		println("$name | state plan Done") color blue
+		printCurrentMessage color magenta
+	}
+	
+	State handleReplyFailed{
+		println("$name | state Plan Failed") color blue
+		printCurrentMessage color magenta
+		onMsg(doplanfailed:doplanfailed(PLANTODO)){
+			[#  
+			   val toDo =  payloadArg(0)
+			 #]
+			println("$name | $toDo")
+		}
+		
+	}
+}
+
+
+

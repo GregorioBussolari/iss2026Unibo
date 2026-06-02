@@ -41,9 +41,9 @@ class Receiver ( name: String, scope: CoroutineScope, isconfined: Boolean=false,
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition( edgeName="goto",targetState="waitForDispatch", cond=doswitch() )
+					 transition( edgeName="goto",targetState="waitForMsgs", cond=doswitch() )
 				}	 
-				state("waitForDispatch") { //this:State
+				state("waitForMsgs") { //this:State
 					action { //it:State
 						CommUtils.outblue("$name in ${currentState.stateName} | $currentMsg | ${Thread.currentThread().getName()} n=${Thread.activeCount()}")
 						 	   
@@ -54,21 +54,40 @@ class Receiver ( name: String, scope: CoroutineScope, isconfined: Boolean=false,
 					sysaction { //it:State
 					}	 	 
 					 transition(edgeName="t00",targetState="s2",cond=whenDispatch("msg1"))
+					transition(edgeName="t01",targetState="s3",cond=whenDispatch("msg2"))
 				}	 
 				state("s2") { //this:State
 					action { //it:State
 						CommUtils.outblue("$name in ${currentState.stateName} | $currentMsg | ${Thread.currentThread().getName()} n=${Thread.activeCount()}")
 						 	   
-						 logger.info(  "${currentState.stateName} handling $currentMsg"  )  
+						  logger.info(  "${currentState.stateName} handling $currentMsg"  )  
 						if( checkMsgContent( Term.createTerm("msg1(ARG)"), Term.createTerm("msg1(ARG)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								CommUtils.outblue("$name in s2 | msg1:msg1(${payloadArg(0)})")
+								delay(1000) 
 						}
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
+					 transition(edgeName="t02",targetState="s3",cond=whenDispatch("msg2"))
+				}	 
+				state("s3") { //this:State
+					action { //it:State
+						CommUtils.outblue("$name in ${currentState.stateName} | $currentMsg | ${Thread.currentThread().getName()} n=${Thread.activeCount()}")
+						 	   
+						  logger.info(  "${currentState.stateName} handling $currentMsg"  )  
+						if( checkMsgContent( Term.createTerm("msg2(ARG)"), Term.createTerm("msg2(1)"), 
+						                        currentMsg.msgContent()) ) { //set msgArgList
+								CommUtils.outblue("$name in s3 | msg2:msg2(${payloadArg(0)})")
+						}
+						//genTimer( actor, state )
+					}
+					//After Lenzi Aug2002
+					sysaction { //it:State
+					}	 	 
+					 transition( edgeName="goto",targetState="waitForMsgs", cond=doswitch() )
 				}	 
 			}
 		}

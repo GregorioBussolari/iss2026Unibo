@@ -29,14 +29,38 @@ class Sender ( name: String, scope: CoroutineScope, isconfined: Boolean=false, i
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
 		//val interruptedStateTransitions = mutableListOf<Transition>()
 		//IF actor.withobj !== null val actor.withobj.name� = actor.withobj.method�ENDIF
+		 var emitEvents = true   
+			   var DT         = 1000L; 
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
 						 logger.info(  "${currentState.stateName} handling $currentMsg"  )  
-						CommUtils.outgreen(" $name sends msg1: msg1(ciao) ")
+						CommUtils.outgreen("$name sends msg1: msg1(1)... ")
 						 logger.info(  "${currentState.stateName} sending msg1:msge1(1)"  )  
+						forward("msg1", "msg1(1)" ,"receiver" ) 
 						delay(300) 
-						forward("msg1", "msg1(ciao)" ,"receiver" ) 
+						CommUtils.outgreen("$name sends msg1: msg1(2)... ")
+						 logger.info(  "${currentState.stateName} sending msg1:msge1(2)"  )  
+						forward("msg1", "msg1(2)" ,"receiver" ) 
+						//genTimer( actor, state )
+					}
+					//After Lenzi Aug2002
+					sysaction { //it:State
+				 	 		stateTimer = TimerActor("timer_s0", 
+				 	 					  scope, context!!, "local_tout_"+name+"_s0", DT )  //OCT2023
+					}	 	 
+					 transition(edgeName="t03",targetState="sendothermsgs",cond=whenTimeout("local_tout_"+name+"_s0"))   
+				}	 
+				state("sendothermsgs") { //this:State
+					action { //it:State
+						 logger.info(  "${currentState.stateName} handling $currentMsg"  )  
+						CommUtils.outgreen("$name sends msg2 after $DT ... ")
+						 logger.info(  "${currentState.stateName} sending msg2:msg2(1)"  )  
+						forward("msg2", "msg2(1)" ,"receiver" ) 
+						if(  emitEvents  
+						 ){ logger.info(  "${currentState.stateName} emits alarm"  )  
+						emit("alarm", "alarm(fire)" ) 
+						}
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002

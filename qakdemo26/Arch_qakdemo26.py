@@ -26,7 +26,10 @@ with Diagram('qakdemo26Arch', show=False, outformat='png', graph_attr=graphattr)
      sys = Custom('','./qakicons/system.png')
 ### see https://renenyffenegger.ch/notes/tools/Graphviz/attributes/label/HTML-like/index
      with Cluster('ctxqakdemo26', graph_attr=nodeattr):
-          sender=Custom('sender','./qakicons/symActorWithobjSmall.png')
           receiver=Custom('receiver','./qakicons/symActorWithobjSmall.png')
-     sender >> Edge(color='blue', style='solid',  decorate='true', label='<msg1 &nbsp; >',  fontcolor='blue') >> receiver
+          sender=Custom('sender','./qakicons/symActorWithobjSmall.png')
+          perceiver=Custom('perceiver','./qakicons/symActorWithobjSmall.png')
+     sender >> Edge( label='alarm', **eventedgeattr, decorate='true', fontcolor='red') >> sys
+     sys >> Edge( label='alarm', **evattr, decorate='true', fontcolor='darkgreen') >> perceiver
+     sender >> Edge(color='blue', style='solid',  decorate='true', label='<msg1 &nbsp; msg2 &nbsp; >',  fontcolor='blue') >> receiver
 diag

@@ -29,7 +29,6 @@ class Boundaryworker ( name: String, scope: CoroutineScope, isconfined: Boolean=
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
 		//val interruptedStateTransitions = mutableListOf<Transition>()
 		//IF actor.withobj !== null val actor.withobj.name� = actor.withobj.method�ENDIF
-		 val MAX_TURNS = 4; var turns = 0  
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
@@ -39,36 +38,17 @@ class Boundaryworker ( name: String, scope: CoroutineScope, isconfined: Boolean=
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition( edgeName="goto",targetState="walking", cond=doswitch() )
+					 transition( edgeName="goto",targetState="work", cond=doswitch() )
 				}	 
-				state("walking") { //this:State
+				state("work") { //this:State
 					action { //it:State
-						CommUtils.outgreen("$name | going straight")
-						request("step", "step(2500)" ,"robotactor" )  
+						CommUtils.outgreen("$name go Straight on")
+						request("step", "step(1000)" ,"robotactor" )  
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t00",targetState="walking",cond=whenReply("stepdone"))
-					transition(edgeName="t01",targetState="turning",cond=whenReply("stepfailed"))
-				}	 
-				state("turning") { //this:State
-					action { //it:State
-						 turns++  
-						CommUtils.outyellow("$name | wall hit ($turns/$MAX_TURNS), turning left")
-						forward("move", "move(l)" ,"robotactor" ) 
-						if(  turns >= MAX_TURNS  
-						 ){forward("move", "move(h)" ,"robotactor" ) 
-						CommUtils.outred("$name | boundary walk complete after $turns turns")
-						System.exit(0) 
-						}
-						//genTimer( actor, state )
-					}
-					//After Lenzi Aug2002
-					sysaction { //it:State
-					}	 	 
-					 transition( edgeName="goto",targetState="walking", cond=doswitch() )
 				}	 
 			}
 		}

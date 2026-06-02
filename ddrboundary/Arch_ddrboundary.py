@@ -30,5 +30,4 @@ with Diagram('ddrboundaryArch', show=False, outformat='png', graph_attr=graphatt
      with Cluster('ctxrobotservice26', graph_attr=nodeattr):
           robotactor=Custom('robotactor(ext)','./qakicons/externalQActor.png')
      boundaryworker >> Edge(color='magenta', style='solid', decorate='true', label='<step<font color="darkgreen"> stepdone stepfailed</font> &nbsp; >',  fontcolor='magenta') >> robotactor
-     boundaryworker >> Edge(color='blue', style='solid',  decorate='true', label='<move &nbsp; >',  fontcolor='blue') >> robotactor
 diag
