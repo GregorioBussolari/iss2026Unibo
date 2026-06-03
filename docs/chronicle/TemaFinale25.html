@@ -1,4 +1,4 @@
-	<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 <head>
 
@@ -61,7 +61,7 @@ The company asks us to build a software systems (named <strong>cargoservice</str
     <li>
       is able to ensure that the product container is placed by the cargorobot within its reserved slot. At the end of the work:
       <ul>
-        <li>the cargorobot should return to its HOME location.</li>
+        <li>the cargorobot should return to its <b>HOME</b> location.</li>
         <li>the cargoservice can process another load-request.</li>
       </ul>
     </li>
@@ -77,7 +77,169 @@ The company asks us to build a software systems (named <strong>cargoservice</str
 <h2>Requirement analysis</h2>
 
 <ul>
-  <li> Il committente fornisce una entità VirtualRobot, ossia un servizio che fornisce una rappresentazione della Hold
+  <li> Il committente fornisce una rappresentazione della stiva di carico per la nave e del Differential drive robot, con cui simulare il comportamento atteso dal sistema?
+      <br>Il committente fornisce una entità <a href= "https://github.com/GregorioBussolari/iss2026Unibo/tree/main/robotsmart26">VirtualRobot</a>, ossia un servizio che fornisce una rappresentazione della Hold. Tale servizio è raggiungibile via WebSocket, pertanto la comunicazione avviene tramite
+      scambio di messaggi. Per comunicare con questo servizio, viene specificato l'utilizzo del linguaggio <a href="https://anatali.github.io/issLab2026/_static/docs/Protobook.pdf#chapter.28">CRIL</a>.<br>
+      In particolare i messaggi prendono la seguente sintassi: <br>
+
+      Per esprimere comandi base per il movimento del robot si interagisce usando stringhe JSON nel seguente fornato cril 
+      <pre>
+        {"robotmove":"CMDMOVE", "time":T}
+          CMDMOVE ::= "turnLeft" | "turnRight" | "moveForward" | "moveBackward" | "alarm"
+          T ::= <NaturalNum>
+      </pre>
+      Il comando “alarm” è sinomimo di halt e vuole evocare l'idea che il robot può fermarsi anche in caso di situazioni anomale
+
+      Mentre in una interazione sincrona di tipo request-response, la risposta è espressa in forme di stringhe JSON 
+      <pre>
+        {"endmove":"RESULT", "move":"MINFO" }
+        RESULT ::= true | false | notallowed
+        MINFO ::= MOVEID | MOVEID-collision | MOVEID-interrupted
+        MOVEID ::= moveForward | moveBackward | turnLeft | turnRight
+      </pre>
+      
+      L'interazione asincrona esistono messaggi di stato:
+      <pre>
+        {"endmove":"RESULT", "move":"MINFO"}
+        RESULT ::= true | false
+        MINFO ::= MOVEID | MOVEID_notallowed (asynch) | MOVEID-interrupted
+        MOVEID ::= moveForward | moveBackward | turnLeft | turnRigh
+      </pre> 
+
+      Inoltre un cliente connesso a WEnv mediante Websocket può ricevere anche informazioni su variazioni dell'ambiente circostante:
+      i dati emessi dai sonar presenti nella scena quando rilevano un oggetto in movimento, dati emessi dai sensori di impatto posti davanti e dietro al robot, quando rilevano un ostacolo. Questi dati sono
+      automaticamente convertiti in messaggi Collision. In particolare se nell’ambiente è presente un sonar e il robot vi passa davanti, WEnv genera
+      <pre>
+        {"sonarName": "<sonarName>", "distance": <int>, "axis": "AXIS" }
+          AXIS = x | y //a seconda dell'orientamento del sonar
+          //Esempio:
+          {"sonarName":"sonar1","distance":-6,"axis":"y"}
+      </pre>
+
+
+      <li> Entità <b>cargorobot</b>: viene fornito o deve essere realizzato? <br>
+        Questa entità deve poter comunicare con il ddr fornito, al fine di caricare i beni nella stiva come richiesto
+        <br> Questa entità potrebbe essere modellata come un attore, in quanto entità computazionale che (a differenza di un oggetto passivo POJO), ha un comportamento
+        reattivo in quanto è in grado di ricevere messaggi in modo sincrono o asincrono e un comportamento proattivo che permette di decidere quando elaborare un messaggio, seguendo la propria logica interna e il proprio ciclo di vita.<br>
+        Il cargorobot deve poter comunicare con il cargoservice, per essere comandato nel movimento 
+        
+        <br> Il cargorobot viene quindi realizzato come un QActor, del quale si presenta il modello:
+        <pre>
+          System cargohold
+
+          Context ctxcargorobot ip [host="localhost" port=8020]
+
+          QActor cargorobot context ctxcargorobot{
+            State s0 initial{
+              println("$name | starts ") color blue
+              [# clearlog("./logs/robotsmart26usage.log") 			//vedi src/main/resources/logback.xml #]
+            }
+          }
+        </pre> 
+
+        <li> Il Radar viene modellato come un attore, che ha il compito di rilevare gli oggetti nel suo campo d'azione, 
+          fornendo la distanza rilevata rispetto ad essi.
+          <br>
+          Si definisce la distanza come una variabile reale D in metri.<br>
+          
+          Il radar può essere rappresentato secondo 2 modelli di funzionamento:
+          <ol type="A">
+              <li> Il radar emette un evento periodico, per avvertire della distanza attuale da ciò che rileva.
+              <li> Il radar risponde ad una richiesta di distanza, fornendo la risposta attuale
+          </ol>
+
+          Da cui il modello qak seguente:
+          <pre>
+                        
+                        //modello A: ad evento periodico 
+                        event radar : distanza (D) //distanza in metri
+
+                        //modello B: a request/response
+                        Request getsonardistance : getdistance(X) //richiesta distanza attuale
+                        Reply   currentdistance : currentdistance(D)   //risposta radar, distanza
+                        
+                        
+                        // QActor ddrsystem
+
+                        QActor radar context ctxddrsys {
+                            
+                            [# var D #] //distanza rilevata in metri
+
+                            State s0 initial{
+                                
+                            }Goto handleDistance
+
+                            //gestione della comunicazione con qactor ddr, segnalazione distanza
+                            State handleDistance{
+                                emit radar : distance($D)
+                            }Transition t0 
+                                whenRequest getsonardistance -> requestedDistance
+
+                            State requestedDistance{
+                                //elab request
+                                replyTo getsonardistance with currentdistance : currentdistance($D)
+                            }
+                        }
+
+          </pre>
+
+        <li> <b>Product service</b>: viene fornito o deve essere realizzato?<br>
+           Si tratta di un servizio che viene fornito e realizza un database che permette di registrare i prodotti, specificandone il peso come attributo.
+           Viene anche detto che dopo la registrazione ritorna un product identifier univoco PID:
+           <pre>
+              int PID; // numero naturale univoco > 0 
+              float weight // peso del prodotto
+          </pre>
+
+        <li><b>Hold</b> e <b>Slot</b>: in quanto area rettangolare viene ad essere modellata come una griglia. Viene pertanto formalizzata come un POJO 
+          come segue: 
+        <pre>
+          public class Hold{
+            private int width;  // larghezza hold
+            private int length; // lunghezza hold
+            int hold[][]        //griglia hold
+
+            public static class Coord {
+              private final int x;
+              private final int y;
+      
+              public Coord(int x, int y) {
+                  this.x = x;
+                  this.y = y;
+              }
+      
+              public int getX() { return x; }
+              public int getY() { return y; }
+            }
+
+            //Proprietà intrinseche di Hold
+            private static final int MAX_PRODUCT_SLOTS = 4;
+    
+            // Mappa intrinseca: data una coordinata X,Y della Hold, restituisce lo Slot
+            private Map<Coord, Slot> gridSlots = new HashMap<>();
+
+            // Posizione della porta I/O
+            private Coord ioPortCoord;
+    
+            // Gestione intrinseca dell'area fissa "slots5" (modellata come coordinata occupata)
+            private Coord slots5Area;
+
+            //HOME location del cargo robot 
+            private Coord home_location; 
+          }
+
+          public class Slot{
+            boolean occupato = false; // slot occupato o libero
+            private Integer pid = null; // Se null, lo slot è libero. Altrimenti contiene l'ID del prodotto.
+          }
+        </pre> 
+
+        <li><b>CargoService</b>: viene richiesto di costruire un sistema software detto cargoService.<br>
+          Esso deve ricevere richieste di carico e se possibile elaborare il carico del prodotto nel Hold. Per fornire una risposta
+          alle richieste dei clienti, dovrà comunicare con il product service fornito dal committente. 
+
+        <li> Esiste codice per determinare il percorso più breve per arrivare allo slot assegnato o deve essere creato?<br>
+          Il committente fornisce anche il codice per trovare il percorso, delegando ad uno specifico componente tale calcolo.  
 </ul>
 
 
@@ -85,6 +247,17 @@ The company asks us to build a software systems (named <strong>cargoservice</str
 <h2>Problem analysis</h2>
 
 <h2>Test plans</h2> 
+
+<ol>
+  <li> Test plan per verificare la correttezza delle casistiche possibili nelle richieste di carico a cargoservice:
+    <ul>
+      <li> Richiesta rifiutata: peso del prodotto troppo elevato o tutti gli slot sono occupati.
+      <li> Richiesta accettata: il cargoservice associa uno slot al product PID e ritorna il nome dello slot riservato. 
+    </ul>
+
+</ol>
+
+
 
 <h2>Project</h2> 
  
